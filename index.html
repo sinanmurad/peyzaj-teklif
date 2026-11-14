@@ -100,7 +100,8 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <div class="card"><h2>📩 DM'ye ilk cevap</h2><p class="mut" style="margin-top:-6px">Instagram'dan talep gelince bunu gönder, müşteriyi WhatsApp'a çek.</p><textarea id="dm" style="min-height:150px"></textarea>
   <div style="margin-top:10px"><button class="btn full" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="kopya('dm')">Kopyala</button></div></div>
  <div class="card"><h2>👤 Müşteri</h2><label>Müşteri adı (ör. Ahmet Bey)</label><input id="musteri" placeholder="Boş bırakılabilir"></div>
- <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2><textarea id="wa"></textarea>
+ <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2>
+  <label class="sw" style="border-top:0;padding-top:0">Gruplu teklif (birim fiyat görünmez) <input type="checkbox" id="mGrup" class="tgl"></label><textarea id="wa"></textarea>
   <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div>
   <button class="btn full" style="margin-top:8px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="igKopya()">Instagram DM için kopyala</button> <span id="kmsg" class="mut"></span></div></div>
  <div class="card"><h2>📦 Tedarikçi sipariş listesi</h2><p class="mut" style="margin-top:-6px">Sadece sende kalır. Müşteri onaylayınca firmaya gönder.</p><textarea id="sip" style="min-height:140px"></textarea>
@@ -678,6 +679,8 @@ TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('optio
 
 const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde'];
+try{$('mGrup').checked=localStorage.getItem('peyzajGrup')!=='0'}catch(e){}
+$('mGrup').addEventListener('change',()=>{try{localStorage.setItem('peyzajGrup',$('mGrup').checked?'1':'0')}catch(e){};hesap()});
 try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
 $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
@@ -752,7 +755,7 @@ function hesap(seciliCiz=true){kaydet();
  const wa=(dg.length===12&&$('mWa').checked)?'wa.me/'+dg:'';
  const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
  $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
- $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
+ $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kalemMetni(kal_,ag,m3,alan)+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
 function karCiz(L,top,mal,isG,std,K){const kar=top-mal,y=mal?kar/mal*100:0,c=kar>=0?'pos':'neg',f=x=>'%'+Math.round(x);
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
@@ -760,6 +763,15 @@ function karCiz(L,top,mal,isG,std,K){const kar=top-mal,y=mal?kar/mal*100:0,c=kar
  $('kBox').style.opacity=K?1:.45;
  $('kTab').innerHTML='<tr><th>Kalem</th><th class="n">Maliyet</th><th class="n">Teklif</th></tr>'+L.map(k=>`<tr><td>${k[0].replace(/ \(.*$/,'').slice(0,40)}</td><td class="n">${tl(Math.round(k[3]))}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+(isG?`<tr><td>İşçi + diğer</td><td class="n">${tl(Math.round(isG))}</td><td class="n">–</td></tr>`:'')+`<tr class="tot"><td>Toplam</td><td class="n">${tl(Math.round(mal))}</td><td class="n">${tl(top)}</td></tr>`}
 function kSet(x){$('kOran').value=x;$('kRng').value=Math.min(200,x);$('kOn').checked=true;hesap()}
+function kalemMetni(L,ag,m3,alan){const tek=k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`;
+ if(!$('mGrup').checked)return L.map(tek).join('\n');
+ const nS=L.length-ag.length,S=L.slice(0,nS),B=L.slice(nS),out=[];
+ if(S.length){const p=[m3>0?'toprak dolgusu ('+(Math.round(m3*10)/10)+' m³)':''];if($('cCim').checked)p.push('çim');if($('cSul').checked)p.push('otomatik sulama');const q=p.filter(Boolean);
+  const ad='Zemin hazırlığı, '+(q.length>1?q.slice(0,-1).join(', ')+' ve '+q.slice(-1):q[0]||'')+' ('+alan+' m²)';
+  out.push(`• ${ad}: ${tl(S.reduce((a,k)=>a+yuv(k[1]),0))}`)}
+ if(B.length){const aS=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
+  out.push(`• Bitkilendirme (${[aS?aS+' ağaç':'',cS?cS+' çalı/süs bitkisi':''].filter(Boolean).join(', ')}, dikim dahil): ${tl(B.reduce((a,k)=>a+yuv(k[1]),0))}`+'\n'+ag.map(d=>`   – ${d.ad} × ${d.adet}`).join('\n'))}
+ return out.join('\n')}
 function igKopya(){const t=$('wa').value.replace(/\*/g,'');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Kopyalandı, Instagram DM\'e yapıştır')).catch(()=>{$('wa').select();toast('Metni seçtim, elle kopyala')})}
 function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{m.textContent='';toast('Kopyalandı ✓')}).catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
