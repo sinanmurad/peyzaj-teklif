@@ -97,6 +97,8 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <div class="card"><h2><span class="step">3</span>Teklif özeti</h2><table id="ozet"></table></div>
 </section>
 <section id="p4" class="hide">
+ <div class="card"><h2>📩 DM'ye ilk cevap</h2><p class="mut" style="margin-top:-6px">Instagram'dan talep gelince bunu gönder, müşteriyi WhatsApp'a çek.</p><textarea id="dm" style="min-height:150px"></textarea>
+  <div style="margin-top:10px"><button class="btn full" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="kopya('dm')">Kopyala</button></div></div>
  <div class="card"><h2>👤 Müşteri</h2><label>Müşteri adı (ör. Ahmet Bey)</label><input id="musteri" placeholder="Boş bırakılabilir"></div>
  <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2><textarea id="wa"></textarea>
   <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div>
@@ -713,7 +715,11 @@ function hesap(seciliCiz=true){kaydet();
  $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} ${/\(m²\)$/.test(d.ad)?'m²':'adet'} (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
  const mus=$('musteri').value.trim(),fir=$('mFirma').value.trim(),ad=$('mAd2').value.trim(),tel=$('mTel').value.trim(),ig=$('mIg').value.trim(),gun=$('mGun').value.trim(),ode=$('mOde').value.trim();
  const selam='Merhaba'+(mus?' '+mus:'')+','+(fir||ad?' ben '+[fir,ad].filter(Boolean).join("'dan ")+'.':'');
- const imza=[[ad,fir].filter(Boolean).join(' · '),tel,ig].filter(Boolean).join('\n');
+ let dg=tel.replace(/\D/g,'');if(dg.startsWith('0'))dg='90'+dg.slice(1);if(dg.length===10)dg='90'+dg;
+ const telG=dg.length===12?`+${dg.slice(0,2)} ${dg.slice(2,5)} ${dg.slice(5,8)} ${dg.slice(8,10)} ${dg.slice(10)}`:tel;
+ const wa=dg.length===12?'wa.me/'+dg:'';
+ const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
+ $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
 function igKopya(){const t=$('wa').value.replace(/\*/g,'');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Kopyalandı, Instagram DM\'e yapıştır')).catch(()=>{$('wa').select();toast('Metni seçtim, elle kopyala')})}
 function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
