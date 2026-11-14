@@ -116,11 +116,17 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <div class="card"><h2>⚙️ Birim fiyatlar</h2>
   <div class="grid">
    <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" inputmode="decimal" value="1500"></div>
-   <div><label>Çim, kendi fiyatım (TL/m²)</label><input id="fCim" type="number" inputmode="decimal" value="190"></div>
-   <div><label>Rulo çim serim (TL/m²)</label><input id="fCS" type="number" inputmode="decimal" value="50"></div>
+
    <div><label>Sulama (TL/m²)</label><input id="fSul" type="number" inputmode="decimal" value="320"></div>
    <div><label>Bitki kâr payı (%)</label><input id="fPay" type="number" inputmode="decimal" value="25"></div>
    <div><label>Ağaç sınırı (m²/ağaç)</label><input id="fLim" type="number" inputmode="decimal" value="10"></div>
+  </div>
+ </div>
+ <div class="card"><h2>🟩 Çim</h2>
+  <p class="mut" style="margin-top:-6px">Teklif ekranında çim için <b>tedarikçi seçersen</b> fiyat = tedarikçi fiyatı + kâr payı + serim işçiliği olur. <b>"Kendi birim fiyatım"</b> seçili kalırsa aşağıdaki sabit fiyat kullanılır.</p>
+  <div class="grid">
+   <div><label>Tedarikçi seçince serim işçiliği (TL/m²)</label><input id="fCS" type="number" inputmode="decimal" value="50"></div>
+   <div><label>Kendi sabit fiyatım, her şey dahil (TL/m²)</label><input id="fCim" type="number" inputmode="decimal" value="190"></div>
   </div>
  </div>
  <div class="card"><h2>🌳 Dikim işçiliği</h2>
