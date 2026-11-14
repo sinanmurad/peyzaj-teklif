@@ -97,6 +97,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <div class="card"><h2><span class="step">3</span>Teklif özeti</h2><table id="ozet"></table></div>
 </section>
 <section id="p4" class="hide">
+ <div class="card"><h2>👤 Müşteri</h2><label>Müşteri adı (ör. Ahmet Bey)</label><input id="musteri" placeholder="Boş bırakılabilir"></div>
  <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2><textarea id="wa"></textarea>
   <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div> <span id="kmsg" class="mut"></span></div></div>
  <div class="card"><h2>📦 Tedarikçi sipariş listesi</h2><p class="mut" style="margin-top:-6px">Sadece sende kalır. Müşteri onaylayınca firmaya gönder.</p><textarea id="sip" style="min-height:140px"></textarea>
@@ -113,6 +114,17 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  </div>
 </section>
 <section id="p3" class="hide">
+ <div class="card"><h2>🏷️ Firma bilgilerin</h2>
+  <p class="mut" style="margin-top:-6px">Her WhatsApp teklifine otomatik eklenir.</p>
+  <div class="grid">
+   <div><label>Firma adı</label><input id="mFirma" value="Bahçem Peyzaj"></div>
+   <div><label>Adın</label><input id="mAd2" value="Sinan"></div>
+   <div><label>Telefon</label><input id="mTel" type="tel" placeholder="05xx xxx xx xx"></div>
+   <div><label>Instagram</label><input id="mIg" value="@bahcemmpeyzaj"></div>
+   <div><label>Teklif geçerliliği (gün)</label><input id="mGun" type="number" inputmode="numeric" value="15"></div>
+  </div>
+  <div style="margin-top:10px"><label>Ödeme şekli</label><input id="mOde" value="%50 başlangıçta, %50 teslimde"></div>
+ </div>
  <div class="card"><h2>⚙️ Birim fiyatlar</h2>
   <div class="grid">
    <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" inputmode="decimal" value="1500"></div>
@@ -636,8 +648,10 @@ TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('optio
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
 const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN'];
+const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde'];
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
-function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s))}catch(e){}}
+try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
 const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
@@ -696,7 +710,10 @@ function hesap(seciliCiz=true){kaydet();
  const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
  if(cimSat)(grp[cimSat.firma]=grp[cimSat.firma]||[]).push({ad:cimSat.ad+' (m²)',adet:alan,fiyat:cimSat.fiyat});
  $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} ${/\(m²\)$/.test(d.ad)?'m²':'adet'} (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
- $('wa').value=`Merhaba, konsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\nKesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`}
+ const mus=$('musteri').value.trim(),fir=$('mFirma').value.trim(),ad=$('mAd2').value.trim(),tel=$('mTel').value.trim(),ig=$('mIg').value.trim(),gun=$('mGun').value.trim(),ode=$('mOde').value.trim();
+ const selam='Merhaba'+(mus?' '+mus:'')+','+(fir||ad?' ben '+[fir,ad].filter(Boolean).join("'dan ")+'.':'');
+ const imza=[[ad,fir].filter(Boolean).join(' · '),tel,ig].filter(Boolean).join('\n');
+ $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
 function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{m.textContent='';toast('Kopyalandı ✓')}).catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
 function katalog(){const q=norm($('kq').value.trim()),t=$('kt').value,s=$('kst').checked;
@@ -705,7 +722,7 @@ function katalog(){const q=norm($('kq').value.trim()),t=$('kt').value,s=$('kst')
  $('ktab').innerHTML='<tr><th>Bitki</th><th>Tür</th><th>Boy cm</th><th>Çap Q</th><th>Saksı L</th><th class="n">Fiyat</th><th>Firma</th></tr>'+L.map(d=>`<tr class="${d.stok?'':'out'}" style="${d.stok?'':'opacity:.5'}"><td style="display:flex;align-items:center">${foto(d)}<span>${d.ad}</span></td><td>${d.tur}</td><td>${d.boy}</td><td>${d.cap}</td><td>${d.lt}</td><td class="n">${tl(d.fiyat)}</td><td class="firma">${d.firma}</td></tr>`).join('')}
 let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csvTA.id='csvta';csvTA.style.cssText='margin-top:8px;min-height:120px';$('cmsg').after(csvTA)}
  csvTA.value='Bitki;Tür;Boy cm;Çap Q;Saksı L;Fiyat TL;Stokta;Firma\n'+DATA.map(d=>[d.ad,d.tur,d.boy,d.cap,d.lt,d.fiyat,d.stok?'Evet':'Hayır',d.firma].join(';')).join('\n');kopya('csvta')}
-['alan','kal','cCim','cSul',...AYAR].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+['alan','kal','cCim','cSul','musteri',...AYAR,...METIN].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.ad+' – '+c.fiyat+' TL/m²';$('cimK').appendChild(o)});
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
