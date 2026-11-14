@@ -99,7 +99,8 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
 <section id="p4" class="hide">
  <div class="card"><h2>👤 Müşteri</h2><label>Müşteri adı (ör. Ahmet Bey)</label><input id="musteri" placeholder="Boş bırakılabilir"></div>
  <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2><textarea id="wa"></textarea>
-  <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div> <span id="kmsg" class="mut"></span></div></div>
+  <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div>
+  <button class="btn full" style="margin-top:8px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="igKopya()">Instagram DM için kopyala</button> <span id="kmsg" class="mut"></span></div></div>
  <div class="card"><h2>📦 Tedarikçi sipariş listesi</h2><p class="mut" style="margin-top:-6px">Sadece sende kalır. Müşteri onaylayınca firmaya gönder.</p><textarea id="sip" style="min-height:140px"></textarea>
   <div style="margin-top:10px"><button class="btn sec full" onclick="kopya('sip')">Listeyi kopyala</button></div></div>
 </section>
@@ -714,6 +715,7 @@ function hesap(seciliCiz=true){kaydet();
  const selam='Merhaba'+(mus?' '+mus:'')+','+(fir||ad?' ben '+[fir,ad].filter(Boolean).join("'dan ")+'.':'');
  const imza=[[ad,fir].filter(Boolean).join(' · '),tel,ig].filter(Boolean).join('\n');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
+function igKopya(){const t=$('wa').value.replace(/\*/g,'');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Kopyalandı, Instagram DM\'e yapıştır')).catch(()=>{$('wa').select();toast('Metni seçtim, elle kopyala')})}
 function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{m.textContent='';toast('Kopyalandı ✓')}).catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
 function katalog(){const q=norm($('kq').value.trim()),t=$('kt').value,s=$('kst').checked;
