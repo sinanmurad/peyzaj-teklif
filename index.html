@@ -2,112 +2,162 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Peyzaj Teklif Hesaplayıcı</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2f7d4a">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Teklif">
 <style>
-:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2a1f;--mut:#667066;--line:#e3e6df;--acc:#2f7d4a;--acc2:#e8f3ec;--warn:#b5452b}
-:root{color-scheme:light}*{box-sizing:border-box}input,select,textarea,button{color:var(--ink);font-family:inherit}body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
-header{padding:16px;background:var(--acc);color:#fff}header h1{margin:0;font-size:19px}header p{margin:4px 0 0;opacity:.85;font-size:13px}
-nav{display:flex;gap:6px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-nav button{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);border-radius:8px;font-size:14px;cursor:pointer}
-nav button.on{background:var(--acc);color:#fff !important;border-color:var(--acc)}
-main{max-width:760px;margin:0 auto;padding:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
-.card h2{margin:0 0 10px;font-size:16px}
+:root{--bg:#f2f4f0;--card:#fff;--ink:#17231a;--mut:#6b746c;--line:#e4e8e1;--acc:#2f7d4a;--acc-d:#245f39;--acc2:#e6f2ea;--warn:#b5452b;--st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,Segoe UI,Roboto,sans-serif;font-size:16px;-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+input,select,textarea,button{color:var(--ink);font-family:inherit;font-size:16px}
+header{position:sticky;top:0;z-index:20;background:var(--acc);color:#fff;padding:calc(var(--st) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
+header .sub{font-size:12px;opacity:.85;margin-top:2px}
+header .hbtn{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:20px;padding:7px 12px;font-size:14px;font-weight:600}
+main{max-width:640px;margin:0 auto;padding:12px 12px calc(150px + var(--sb))}
+.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{margin:0 0 12px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.step{width:24px;height:24px;border-radius:50%;background:var(--acc);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
-input,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff}
-.btn{padding:9px 12px;border:0;border-radius:8px;background:var(--acc);color:#fff !important;font-size:14px;cursor:pointer}
-.btn.sec{background:var(--acc2);color:var(--acc) !important}.btn.del{background:none;color:var(--warn) !important;padding:4px 8px}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.tot td{font-weight:700;font-size:16px;border-bottom:0}
-.warn{color:var(--warn);font-size:13px;margin-top:6px}.mut{color:var(--mut);font-size:12px}
-.res{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
-.res div{padding:8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;cursor:pointer}
-.res div:hover{background:var(--acc2)}.res .out{opacity:.5}
-.tag{font-size:11px;background:var(--acc2);color:var(--acc);padding:1px 6px;border-radius:10px;margin-left:4px}
-textarea{width:100%;min-height:200px;padding:10px;border:1px solid var(--line);border-radius:8px;font:14px/1.45 inherit;font-family:inherit}
-.row{display:flex;gap:8px;align-items:end}.row>*{flex:1}.row .btn{flex:0 0 auto}
-.hide{display:none}.th{width:44px;height:44px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;cursor:zoom-in;background:var(--line);flex:none}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}#modal.hide{display:none}#modal .box{background:#fff;border-radius:12px;max-width:420px;width:100%;overflow:hidden}#modal img{width:100%;display:block;max-height:70vh;object-fit:contain;background:#eee}#modal .cap{padding:10px 12px}
-.res div>span{display:flex;align-items:center}
-.foto{text-decoration:none;font-size:16px;margin-right:6px;padding:2px 4px;border-radius:6px;background:var(--acc2)}.firma{font-size:11px;color:var(--mut);margin-left:6px;font-style:italic}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#f8faf7;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);background:#fff}
+.sw{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:15px;color:var(--ink);margin:0}
+.sw input{width:auto;height:auto}
+.tgl{appearance:none;-webkit-appearance:none;width:48px!important;height:28px!important;border-radius:20px;background:#d5dad3;position:relative;border:0;padding:0;transition:.2s}
+.tgl:checked{background:var(--acc)}.tgl::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}.tgl:checked::after{left:23px}
+.btn{height:46px;padding:0 16px;border:0;border-radius:12px;background:var(--acc);color:#fff!important;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{background:var(--acc-d)}.btn.sec{background:var(--acc2);color:var(--acc)!important}.btn.full{width:100%}
+.btn.del{background:none;color:var(--warn)!important;height:36px;padding:0 8px;font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:10px 2px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+.tot td{font-weight:800;font-size:18px;border-bottom:0;padding-top:14px}
+.warn{color:var(--warn);font-size:13px;margin-top:6px}.mut{color:var(--mut);font-size:13px}
+.search{position:relative}.search input{padding-left:40px}.search::before{content:"⌕";position:absolute;left:14px;top:9px;font-size:22px;color:var(--mut)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 14px;font-size:14px;color:var(--ink)}.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.res{max-height:55vh;overflow:auto;margin-top:8px;border-radius:12px;border:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.res div{padding:10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff}
+.res div:active{background:var(--acc2)}.res .out{opacity:.5}.res b{white-space:nowrap;font-size:15px}
+.res div>span{display:flex;align-items:center;min-width:0}
+.add{flex:none;width:30px;height:30px;border-radius:50%;background:var(--acc2);color:var(--acc);display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-left:6px}
+.tag{font-size:11px;background:var(--acc2);color:var(--acc);padding:2px 7px;border-radius:10px;margin-left:4px;white-space:nowrap}
+.firma{font-size:11px;color:var(--mut);margin-left:6px;font-style:italic;white-space:nowrap}
+.th{width:52px;height:52px;object-fit:cover;border-radius:10px;margin-right:10px;cursor:zoom-in;background:var(--line);flex:none}
+.selrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.selrow .nm{flex:1;min-width:0;font-size:15px}
+.stp{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;flex:none}
+.stp button{width:36px;height:38px;border:0;background:#f4f6f3;font-size:20px;color:var(--acc)}.stp input{width:46px;height:38px;border:0;border-radius:0;text-align:center;padding:0;background:#fff}
+textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:12px;font:15px/1.45 inherit;font-family:inherit;background:#f8faf7}
+.row{display:flex;gap:8px;align-items:end}.row>*{flex:1}
+.hide{display:none!important}
+#bar{position:fixed;left:0;right:0;bottom:calc(64px + var(--sb));z-index:25;padding:0 12px 8px;pointer-events:none}
+#bar .in{max-width:640px;margin:0 auto;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,.2);pointer-events:auto}
+#bar .lb{font-size:12px;opacity:.75}#bar .tt{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+#bar .btn{height:42px;background:#fff;color:var(--ink)!important}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding-bottom:var(--sb)}
+.tabbar button{flex:1;height:64px;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--mut);font-weight:600}
+.tabbar button .ic{font-size:22px;line-height:1;filter:grayscale(1);opacity:.6}.tabbar button.on{color:var(--acc)}.tabbar button.on .ic{filter:none;opacity:1}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+#modal .box{background:#fff;border-radius:20px 20px 0 0;max-width:640px;width:100%;overflow:hidden;padding-bottom:var(--sb);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+#modal .grab{width:40px;height:5px;border-radius:3px;background:#ccc;margin:8px auto}
+#modal img{width:100%;display:block;max-height:60vh;object-fit:contain;background:#eee}#modal .cap{padding:14px 16px}
+#toast{position:fixed;left:50%;bottom:calc(150px + var(--sb));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:60;opacity:0;transition:.2s;pointer-events:none}#toast.on{opacity:1}
+.kt td{font-size:14px}.kt .th{width:44px;height:44px}
 </style>
 </head>
 <body>
-<header><h1>Peyzaj Teklif Hesaplayıcı</h1><p>Fiyatlar (14.11.2026): enfidan.com, Canlı Bahçe, Usta Peyzaj (Sakarya) · Rulo çim: Usta Peyzaj, Canlı Bahçe, Ege Peyzaj (İzmir). KDV hariç.</p></header>
-<nav><button id="t1" class="on" onclick="tab(1)">Teklif</button><button id="t2" onclick="tab(2)">Katalog</button><button id="t3" onclick="tab(3)">Ayarlar</button></nav>
+<header><div><h1 id="hT">Yeni Teklif</h1><div class="sub">909 bitki · 4 tedarikçi · KDV hariç</div></div><button class="hbtn" onclick="yeni()">＋ Yeni</button></header>
 <main>
 <section id="p1">
- <div class="card"><h2>1. Alan</h2>
+ <div class="card"><h2><span class="step">1</span>Alan</h2>
   <div class="grid">
    <div><label>Alan (m²)</label><input id="alan" type="number" inputmode="decimal" value="150"></div>
    <div><label>Toprak kalınlığı (cm)</label><input id="kal" type="number" inputmode="decimal" value="13"></div>
   </div>
-  <div class="grid" style="margin-top:10px">
-   <div><label><input type="checkbox" id="cCim" checked style="width:auto"> Çim</label></div>
-   <div><label><input type="checkbox" id="cSul" checked style="width:auto"> Otomatik sulama</label></div>
-  </div>
-  <div style="margin-top:10px"><label>Çim türü / tedarikçi</label><select id="cimK"><option value="-1">Kendi birim fiyatım (Ayarlar)</option></select></div>
+  <div style="margin-top:12px"></div>
+  <label class="sw">Çim <input type="checkbox" id="cCim" class="tgl" checked></label>
+  <div id="cimBox" style="padding-bottom:10px"><select id="cimK"><option value="-1">Kendi birim fiyatım (Ayarlar)</option></select></div>
+  <label class="sw">Otomatik sulama <input type="checkbox" id="cSul" class="tgl" checked></label>
  </div>
- <div class="card"><h2>2. Ağaç / çalı ekle (adet)</h2>
-  <div class="row"><div><label>Ara (ör. çınar, zeytin, 20-25Q)</label><input id="q" placeholder="Bitki adı..."></div>
-  <div style="flex:0 0 120px"><label>Tür</label><select id="qt"><option value="">Hepsi</option></select></div></div>
+ <div class="card"><h2><span class="step">2</span>Ağaç ve çalılar</h2>
+  <div class="search"><input id="q" type="search" placeholder="Ara: çınar, zeytin, 20-25Q…" autocomplete="off"></div>
+  <select id="qt" class="hide"><option value="">Hepsi</option></select>
+  <div class="chips" id="chips"></div>
   <div id="res" class="res hide"></div>
-  <div id="sel" style="margin-top:10px"></div>
+  <div id="sel" style="margin-top:6px"></div>
   <div id="agWarn" class="warn"></div>
  </div>
- <div class="card"><h2>Teklif</h2><table id="ozet"></table></div>
- <div class="card"><h2>Tedarikçi sipariş listesi <span class="mut">(sadece sende kalır)</span></h2><textarea id="sip" style="min-height:120px"></textarea>
-  <div style="margin-top:8px"><button class="btn sec" onclick="kopya('sip')">Kopyala</button></div></div>
- <div class="card"><h2>WhatsApp metni (müşteriye)</h2><textarea id="wa"></textarea>
-  <div style="margin-top:8px"><button class="btn" onclick="kopya('wa')">Kopyala</button> <span id="kmsg" class="mut"></span></div></div>
+ <div class="card"><h2><span class="step">3</span>Teklif özeti</h2><table id="ozet"></table></div>
+</section>
+<section id="p4" class="hide">
+ <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2><textarea id="wa"></textarea>
+  <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div> <span id="kmsg" class="mut"></span></div></div>
+ <div class="card"><h2>📦 Tedarikçi sipariş listesi</h2><p class="mut" style="margin-top:-6px">Sadece sende kalır. Müşteri onaylayınca firmaya gönder.</p><textarea id="sip" style="min-height:140px"></textarea>
+  <div style="margin-top:10px"><button class="btn sec full" onclick="kopya('sip')">Listeyi kopyala</button></div></div>
 </section>
 <section id="p2" class="hide">
- <div class="card"><h2>Katalog</h2>
-  <div class="row"><div><input id="kq" placeholder="Ara..."></div><div style="flex:0 0 120px"><select id="kt"><option value="">Hepsi</option></select></div></div>
-  <label style="margin-top:8px"><input type="checkbox" id="kst" style="width:auto"> Sadece stoktakiler</label>
+ <div class="card"><h2>📚 Katalog</h2>
+  <div class="search"><input id="kq" type="search" placeholder="Katalogda ara…"></div>
+  <div class="row" style="margin-top:8px"><div><select id="kt"><option value="">Tüm türler</option></select></div></div>
+  <label class="sw">Sadece stoktakiler <input type="checkbox" id="kst" class="tgl"></label>
   <p class="mut" id="kcount"></p>
-  <div style="overflow:auto"><table id="ktab"></table></div>
-  <div style="margin-top:8px"><button class="btn sec" onclick="csv()">Tümünü CSV olarak kopyala</button> <span id="cmsg" class="mut"></span></div>
+  <div style="overflow:auto"><table id="ktab" class="kt"></table></div>
+  <div style="margin-top:10px"><button class="btn sec full" onclick="csv()">Tümünü CSV olarak kopyala</button> <span id="cmsg" class="mut"></span></div>
  </div>
 </section>
 <section id="p3" class="hide">
- <div class="card"><h2>Birim fiyatlar (işçilik dahil)</h2>
+ <div class="card"><h2>⚙️ Birim fiyatlar</h2>
   <div class="grid">
-   <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" value="1500"></div>
-   <div><label>Çim, kendi fiyatım (TL/m², işçilik dahil)</label><input id="fCim" type="number" value="190"></div>
-   <div><label>Rulo çim serim işçiliği (TL/m²)</label><input id="fCS" type="number" value="50"></div>
-   <div><label>Sulama (TL/m²)</label><input id="fSul" type="number" value="320"></div>
-   <div><label>Tır nakliyesi (TL/sefer)</label><input id="fTN" type="number" value="19000"></div>
-   <div><label>Tır kapasitesi (m³)</label><input id="fTK" type="number" value="22"></div>
-   <div><label>Küçük araç nakliyesi (TL/sefer)</label><input id="fKN" type="number" value="9000"></div>
-   <div><label>Küçük araç sınırı (m³ ve altı)</label><input id="fKK" type="number" value="10"></div>
-   <div><label>Bitki nakliyesi (TL/iş, sabit)</label><input id="fBN" type="number" value="10000"></div>
-   <div><label>Bitki kâr payı (%)</label><input id="fPay" type="number" value="25"></div>
-   <div><label>Ağaç dikim işçiliği (TL/adet)</label><input id="fDA" type="number" value="1000"></div>
-   <div><label>Çalı dikim işçiliği (TL/adet)</label><input id="fDC" type="number" value="130"></div>
-   <div><label>Ağaç sınırı (m² başına 1 ağaç)</label><input id="fLim" type="number" value="10"></div>
+   <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" inputmode="decimal" value="1500"></div>
+   <div><label>Çim, kendi fiyatım (TL/m²)</label><input id="fCim" type="number" inputmode="decimal" value="190"></div>
+   <div><label>Rulo çim serim (TL/m²)</label><input id="fCS" type="number" inputmode="decimal" value="50"></div>
+   <div><label>Sulama (TL/m²)</label><input id="fSul" type="number" inputmode="decimal" value="320"></div>
+   <div><label>Bitki kâr payı (%)</label><input id="fPay" type="number" inputmode="decimal" value="25"></div>
+   <div><label>Ağaç sınırı (m²/ağaç)</label><input id="fLim" type="number" inputmode="decimal" value="10"></div>
   </div>
-  <button class="btn sec" onclick="sifirla()">Varsayılan fiyatlara dön</button>
  </div>
- <div class="card"><h2>Yeni firma fiyat listesi ekle</h2>
-  <p class="mut">Firmadan gelen listeyi her satıra bir bitki olacak şekilde yapıştır: <b>Bitki adı ; Fiyat ; Tür</b> (Tür: Ağaç, Palmiye, İbreli, Çalı, Sarmaşık, Çim-Saz). Örnek: <i>Çınar 18-20Q ; 3200 ; Ağaç</i></p>
-  <div class="grid"><div><label>Firma adı</label><input id="ekFirma" placeholder="ör. Sakura Fidancılık"></div><div><label>Firma telefon/site</label><input id="ekIlet" placeholder="ör. 0532 366 42 26"></div></div>
-  <textarea id="ekListe" style="min-height:120px;margin-top:8px" placeholder="Çınar 18-20Q ; 3200 ; Ağaç"></textarea>
-  <div style="margin-top:8px"><button class="btn" onclick="ekle_liste()">Listeyi ekle</button> <button class="btn sec" onclick="firmaSil()">Bu firmanın listesini sil</button> <span id="ekmsg" class="mut"></span></div>
-  <p class="mut" id="ekOzet"></p>
-  <p class="mut">Bitki pay, enfidan perakende fiyatının üstüne eklenir ve müşteriye ayrı satır olarak gösterilmez. Değerler bu tarayıcıda saklanır.</p>
+ <div class="card"><h2>🌳 Dikim işçiliği</h2>
+  <div class="grid">
+   <div><label>Ağaç (TL/adet)</label><input id="fDA" type="number" inputmode="decimal" value="1000"></div>
+   <div><label>Çalı (TL/adet)</label><input id="fDC" type="number" inputmode="decimal" value="130"></div>
+  </div>
+ </div>
+ <div class="card"><h2>🚚 Nakliye</h2>
+  <div class="grid">
+   <div><label>Tır (TL/sefer)</label><input id="fTN" type="number" inputmode="decimal" value="19000"></div>
+   <div><label>Tır kapasitesi (m³)</label><input id="fTK" type="number" inputmode="decimal" value="22"></div>
+   <div><label>Küçük araç (TL/sefer)</label><input id="fKN" type="number" inputmode="decimal" value="9000"></div>
+   <div><label>Küçük araç sınırı (m³)</label><input id="fKK" type="number" inputmode="decimal" value="10"></div>
+   <div><label>Bitki nakliyesi (TL/iş)</label><input id="fBN" type="number" inputmode="decimal" value="10000"></div>
+  </div>
+  <button class="btn sec full" style="margin-top:12px" onclick="sifirla()">Varsayılan fiyatlara dön</button>
+ </div>
+ <div class="card"><h2>➕ Yeni firma fiyat listesi</h2>
+  <p class="mut">Her satıra bir bitki: <b>Bitki adı ; Fiyat ; Tür</b> (Ağaç, Palmiye, İbreli, Çalı, Sarmaşık, Çim-Saz). Örnek: <i>Çınar 18-20Q ; 3200 ; Ağaç</i></p>
+  <div class="grid"><div><label>Firma adı</label><input id="ekFirma" placeholder="Sakura Fidancılık"></div><div><label>Telefon / site</label><input id="ekIlet" placeholder="0532 …"></div></div>
+  <textarea id="ekListe" style="min-height:120px;margin-top:10px" placeholder="Çınar 18-20Q ; 3200 ; Ağaç"></textarea>
+  <div class="grid" style="margin-top:10px"><button class="btn" onclick="ekle_liste()">Listeyi ekle</button><button class="btn sec" onclick="firmaSil()">Firmayı sil</button></div>
+  <p class="mut" id="ekmsg"></p><p class="mut" id="ekOzet"></p>
+  <p class="mut">Fiyatlar 14.11.2026 tarihli: enfidan.com, Canlı Bahçe, Usta Peyzaj (Sakarya), Ege Peyzaj (İzmir). Ayarlar bu cihazda saklanır.</p>
  </div>
 </section>
 </main>
-<div id="modal" class="hide" onclick="this.classList.add('hide')"><div class="box" onclick="event.stopPropagation()"><img id="mImg" alt=""><div class="cap"><b id="mAd"></b><div class="mut" id="mFiyat"></div><div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="$('modal').classList.add('hide')">Kapat</button><a id="mBuyuk" class="btn sec" target="_blank" rel="noopener" style="text-decoration:none">Sitede büyük aç</a></div></div></div></div>
+<div id="bar"><div class="in"><div><div class="lb">Toplam (KDV hariç)</div><div class="tt" id="altTop">0 TL</div></div><button class="btn" onclick="tab(4)">Gönder ›</button></div></div>
+<nav class="tabbar">
+ <button id="t1" class="on" onclick="tab(1)"><span class="ic">🧮</span>Teklif</button>
+ <button id="t4" onclick="tab(4)"><span class="ic">💬</span>Gönder</button>
+ <button id="t2" onclick="tab(2)"><span class="ic">🌿</span>Katalog</button>
+ <button id="t3" onclick="tab(3)"><span class="ic">⚙️</span>Ayarlar</button>
+</nav>
+<div id="toast"></div>
+<div id="modal" class="hide" onclick="this.classList.add('hide')"><div class="box" onclick="event.stopPropagation()"><div class="grab"></div><img id="mImg" alt=""><div class="cap"><b id="mAd" style="font-size:17px"></b><div class="mut" id="mFiyat" style="margin-top:4px"></div><div class="grid" style="margin-top:12px"><button class="btn" id="mEkle">＋ Teklife ekle</button><a id="mBuyuk" class="btn sec" target="_blank" rel="noopener" style="text-decoration:none">Sitede aç</a></div></div></div></div>
 <script>
 const RAW=`Gold Rider Leylandi 200 cm Üzeri – 25 Litre Saksı|2000|İbreli|||25|1
 Çınar Ağacı 25-30 Q – 45 Litre Saksı|8000|Ağaç||25-30|45|1
@@ -574,13 +624,14 @@ function ekListeYukle(){DATA=DATA.slice(0,BASE_N);let ek=[];try{ek=JSON.parse(lo
 ekListeYukle();
 const fTag=d=>`<span class="firma">${d.firma}</span>`;
 const foto=d=>d.th?`<img class="th" src="${d.th}" loading="lazy" alt="" onclick="event.stopPropagation();goster(${d.i})">`:'';
-function goster(i){const d=DATA[i];$('mImg').src=d.th;$('mAd').textContent=d.ad;$('mFiyat').textContent=tl(d.fiyat)+' · '+d.firma;$('mBuyuk').href=d.img;$('modal').classList.remove('hide')}
+function goster(i){const d=DATA[i];$('mImg').src=d.th;$('mAd').textContent=d.ad;$('mFiyat').textContent=tl(d.fiyat)+' · '+d.firma;$('mBuyuk').href=d.img;$('mEkle').onclick=()=>{ekle(i);$('modal').classList.add('hide')};$('modal').classList.remove('hide')}
 const TURLER=['Ağaç','Palmiye','İbreli','Çalı','Sarmaşık','Çim-Saz','Diğer'];
 const $=id=>document.getElementById(id);
 const tl=n=>Math.round(n).toLocaleString('tr-TR')+' TL';
 const yuv=n=>Math.round(n/500)*500;
 let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
+['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
 const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN','fCS'];
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar6')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
@@ -601,16 +652,19 @@ function firmaSil(){const f=$('ekFirma').value.trim();if(!f||f==='enfidan.com'){
 function ilet(){DATA.forEach(d=>{if(d.ilet)FIRMALAR[d.firma]=d.ilet})}
 function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
-function tab(n){[1,2,3].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});if(n===2)katalog()}
+function tab(n){[1,2,3,4].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder'}[n];window.scrollTo(0,0);if(n===2)katalog()}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
+function yeni(){secili=[];$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
  if(!q&&!t){r.classList.add('hide');return}
  const L=DATA.filter(d=>(!t||d.tur===t)&&(!q||q.split(/\s+/).every(w=>norm(d.ad).includes(w)))).sort((a,b)=>b.stok-a.stok||a.fiyat-b.fiyat).slice(0,60);
- r.innerHTML=L.length?L.map(d=>`<div class="${d.stok?'':'out'}" onclick="ekle(${d.i})"><span>${foto(d)}<span style="flex:1;min-width:0">${d.ad}<span class="tag">${d.tur}</span>${fTag(d)}${d.stok?'':' <span class="tag">tükendi</span>'}</span></span><b>${tl(d.fiyat)}</b></div>`).join(''):'<div>Sonuç yok</div>';
+ r.innerHTML=L.length?L.map(d=>`<div class="${d.stok?'':'out'}" onclick="ekle(${d.i})"><span>${foto(d)}<span style="flex:1;min-width:0">${d.ad}<span class="tag">${d.tur}</span>${fTag(d)}${d.stok?'':' <span class="tag">tükendi</span>'}</span></span><b>${tl(d.fiyat)}<span class="add">+</span></b></div>`).join(''):'<div>Sonuç yok</div>';
  r.classList.remove('hide')}
 function agacMi(d){if(d.tur==='Ağaç'||d.tur==='Palmiye')return true;if(d.tur!=='İbreli')return false;
  const b=parseInt(d.boy)||0,l=parseFloat(d.lt)||0;return b>=150||l>=25||/metre/i.test(d.ad)}
-function ekle(i){const x=secili.find(s=>s.i===i);if(x)x.adet++;else secili.push({i,adet:1,agac:agacMi(DATA[i])});hesap()}
+function ekle(i){const x=secili.find(s=>s.i===i);if(x)x.adet++;else secili.push({i,adet:1,agac:agacMi(DATA[i])});hesap();toast('Eklendi: '+DATA[i].ad.slice(0,30));if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}}
 function tip(i){const x=secili.find(s=>s.i===i);if(x)x.agac=!x.agac;hesap()}
 function sil(i){secili=secili.filter(s=>s.i!==i);hesap()}
 function adet(i,val){const x=secili.find(s=>s.i===i);if(x)x.adet=Math.max(1,parseInt(val)||1);hesap(false)}
@@ -634,19 +688,19 @@ function hesap(seciliCiz=true){kaydet();
  $('agWarn').textContent=agSay>lim?`Uyarı: ${alan} m² için en fazla ${lim} ağaç önerilir, şu an ${agSay}.`:(lim?`Ağaç: ${agSay} / en fazla ${lim}`:'');
  const tukendi=ag.filter(d=>!d.stok);
  const sus=AYAR.filter(k=>k!=='fLim'&&VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
- if(seciliCiz)$('sel').innerHTML=ag.length?'<table>'+ag.map(d=>`<tr><td>${foto(d)}${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç ('+tl(v('fDA'))+')':'çalı ('+tl(v('fDC'))+')'}</a></div></td><td style="width:70px"><input type="number" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"></td><td style="width:40px"><button class="btn del" onclick="sil(${d.i})">✕</button></td></tr>`).join('')+'</table>':'<p class="mut">Henüz bitki seçilmedi.</p>';
+ if(seciliCiz)$('sel').innerHTML=ag.length?ag.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a></div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
  $('ozet').innerHTML=kal_.map(k=>`<tr><td>${k[0]}${k[2]?`<span class="firma">${k[2]}</span>`:''}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+`<tr class="tot"><td>Toplam (KDV hariç)</td><td class="n">${tl(kal_.reduce((a,k)=>a+yuv(k[1]),0))}</td></tr>`+(sus.length?`<tr><td colspan="2" class="warn">Ayarlarda olağan dışı birim fiyat var: ${sus.join(', ')}. Ayarlar sekmesini kontrol et.</td></tr>`:'')+(tukendi.length?`<tr><td colspan="2" class="warn">Sitede tükenmiş: ${tukendi.map(d=>d.ad).join(', ')}</td></tr>`:'');
- const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);
+ const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);$('cimBox').classList.toggle('hide',!$('cCim').checked);
  const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
  if(cimSat)(grp[cimSat.firma]=grp[cimSat.firma]||[]).push({ad:cimSat.ad+' (m²)',adet:alan,fiyat:cimSat.fiyat});
  $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} ${/\(m²\)$/.test(d.ad)?'m²':'adet'} (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
  $('wa').value=`Merhaba, konsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\nKesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`}
 function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
- (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>m.textContent='Kopyalandı').catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
+ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{m.textContent='';toast('Kopyalandı ✓')}).catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
 function katalog(){const q=norm($('kq').value.trim()),t=$('kt').value,s=$('kst').checked;
  const L=DATA.filter(d=>(!t||d.tur===t)&&(!s||d.stok)&&(!q||q.split(/\s+/).every(w=>norm(d.ad).includes(w))));
  $('kcount').textContent=L.length+' ürün';
- $('ktab').innerHTML='<tr><th>Bitki</th><th>Tür</th><th>Boy cm</th><th>Çap Q</th><th>Saksı L</th><th class="n">Fiyat</th><th>Firma</th></tr>'+L.map(d=>`<tr class="${d.stok?'':'out'}" style="${d.stok?'':'opacity:.5'}"><td>${foto(d)}${d.ad}</td><td>${d.tur}</td><td>${d.boy}</td><td>${d.cap}</td><td>${d.lt}</td><td class="n">${tl(d.fiyat)}</td><td class="firma">${d.firma}</td></tr>`).join('')}
+ $('ktab').innerHTML='<tr><th>Bitki</th><th>Tür</th><th>Boy cm</th><th>Çap Q</th><th>Saksı L</th><th class="n">Fiyat</th><th>Firma</th></tr>'+L.map(d=>`<tr class="${d.stok?'':'out'}" style="${d.stok?'':'opacity:.5'}"><td style="display:flex;align-items:center">${foto(d)}<span>${d.ad}</span></td><td>${d.tur}</td><td>${d.boy}</td><td>${d.cap}</td><td>${d.lt}</td><td class="n">${tl(d.fiyat)}</td><td class="firma">${d.firma}</td></tr>`).join('')}
 let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csvTA.id='csvta';csvTA.style.cssText='margin-top:8px;min-height:120px';$('cmsg').after(csvTA)}
  csvTA.value='Bitki;Tür;Boy cm;Çap Q;Saksı L;Fiyat TL;Stokta;Firma\n'+DATA.map(d=>[d.ad,d.tur,d.boy,d.cap,d.lt,d.fiyat,d.stok?'Evet':'Hayır',d.firma].join(';')).join('\n');kopya('csvta')}
 ['alan','kal','cCim','cSul',...AYAR].forEach(id=>$(id).addEventListener('input',()=>hesap()));
@@ -656,6 +710,7 @@ $('cimK').addEventListener('change',()=>hesap());
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
 ['kq','kt','kst'].forEach(id=>$(id).addEventListener('input',katalog));$('kst').addEventListener('change',katalog);
 ilet();ekOzet();ara();hesap();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
