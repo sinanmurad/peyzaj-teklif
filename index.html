@@ -83,7 +83,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   </div>
   <div style="margin-top:12px"></div>
   <label class="sw">Çim <input type="checkbox" id="cCim" class="tgl" checked></label>
-  <div id="cimBox" style="padding-bottom:10px"><select id="cimK"><option value="-1">Kendi birim fiyatım (Ayarlar)</option></select></div>
+  <div id="cimBox" style="padding-bottom:10px"><label>Çimi hangi firmadan alacaksın? (fiyatı değiştirmez, sipariş listesine eklenir)</label><select id="cimK"><option value="-1">Seçilmedi</option></select></div>
   <label class="sw">Otomatik sulama <input type="checkbox" id="cSul" class="tgl" checked></label>
  </div>
  <div class="card"><h2><span class="step">2</span>Ağaç ve çalılar</h2>
@@ -123,11 +123,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   </div>
  </div>
  <div class="card"><h2>🟩 Çim</h2>
-  <p class="mut" style="margin-top:-6px">Teklif ekranında çim için <b>tedarikçi seçersen</b> fiyat = tedarikçi fiyatı + kâr payı + serim işçiliği olur. <b>"Kendi birim fiyatım"</b> seçili kalırsa aşağıdaki sabit fiyat kullanılır.</p>
-  <div class="grid">
-   <div><label>Tedarikçi seçince serim işçiliği (TL/m²)</label><input id="fCS" type="number" inputmode="decimal" value="50"></div>
-   <div><label>Kendi sabit fiyatım, her şey dahil (TL/m²)</label><input id="fCim" type="number" inputmode="decimal" value="190"></div>
-  </div>
+  <div class="grid"><div><label>Çim fiyatı, her şey dahil (TL/m²)</label><input id="fCim" type="number" inputmode="decimal" value="190"></div></div>
  </div>
  <div class="card"><h2>🌳 Dikim işçiliği</h2>
   <div class="grid">
@@ -639,10 +635,10 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN','fCS'];
-try{const s=JSON.parse(localStorage.getItem('peyzajAyar6')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
-function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar6',JSON.stringify(s))}catch(e){}}
-const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,fCS:50};
+const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN'];
+try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s))}catch(e){}}
+const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -683,7 +679,7 @@ function hesap(seciliCiz=true){kaydet();
  const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
  kal_.push(['Toprak dolgusu ('+(Math.round(m3*10)/10)+' m³ × '+tl(v('fTop'))+(nTxt?' + '+nTxt+' nakliye':'')+')',m3*v('fTop')+tir*v('fTN')+kucuk*v('fKN')]);
  const ck=+$('cimK').value,cs=CIM[ck];let cimSat=null;
- if($('cCim').checked){if(cs){const b=cs.fiyat*pay+v('fCS');kal_.push(['Çim uygulaması ('+alan+' m² × '+tl(b)+')',alan*b,cs.firma]);cimSat=cs}else kal_.push(['Çim uygulaması ('+alan+' m² × '+tl(v('fCim'))+')',alan*v('fCim')])}
+ if($('cCim').checked){kal_.push(['Çim uygulaması ('+alan+' m² × '+tl(v('fCim'))+')',alan*v('fCim'),cs?cs.firma:undefined]);if(cs)cimSat=cs}
  if($('cSul').checked)kal_.push(['Otomatik sulama sistemi ('+alan+' m² × '+tl(v('fSul'))+')',alan*v('fSul')]);
  const ag=secili.map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac}));
  const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('fBN'):0;
