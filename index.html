@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peyzaj Teklif Hesaplayıcı</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2f7d4a">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Teklif">
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2a1f;--mut:#667066;--line:#e3e6df;--acc:#2f7d4a;--acc2:#e8f3ec;--warn:#b5452b}
+:root{color-scheme:light}*{box-sizing:border-box}input,select,textarea,button{color:var(--ink);font-family:inherit}body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{padding:16px;background:var(--acc);color:#fff}header h1{margin:0;font-size:19px}header p{margin:4px 0 0;opacity:.85;font-size:13px}
+nav{display:flex;gap:6px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav button{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);border-radius:8px;font-size:14px;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff !important;border-color:var(--acc)}
+main{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h2{margin:0 0 10px;font-size:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+input,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fff}
+.btn{padding:9px 12px;border:0;border-radius:8px;background:var(--acc);color:#fff !important;font-size:14px;cursor:pointer}
+.btn.sec{background:var(--acc2);color:var(--acc) !important}.btn.del{background:none;color:var(--warn) !important;padding:4px 8px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tot td{font-weight:700;font-size:16px;border-bottom:0}
+.warn{color:var(--warn);font-size:13px;margin-top:6px}.mut{color:var(--mut);font-size:12px}
+.res{max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+.res div{padding:8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;cursor:pointer}
+.res div:hover{background:var(--acc2)}.res .out{opacity:.5}
+.tag{font-size:11px;background:var(--acc2);color:var(--acc);padding:1px 6px;border-radius:10px;margin-left:4px}
+textarea{width:100%;min-height:200px;padding:10px;border:1px solid var(--line);border-radius:8px;font:14px/1.45 inherit;font-family:inherit}
+.row{display:flex;gap:8px;align-items:end}.row>*{flex:1}.row .btn{flex:0 0 auto}
+.hide{display:none}.th{width:44px;height:44px;object-fit:cover;border-radius:6px;margin-right:8px;vertical-align:middle;cursor:zoom-in;background:var(--line);flex:none}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}#modal.hide{display:none}#modal .box{background:#fff;border-radius:12px;max-width:420px;width:100%;overflow:hidden}#modal img{width:100%;display:block;max-height:70vh;object-fit:contain;background:#eee}#modal .cap{padding:10px 12px}
+.res div>span{display:flex;align-items:center}
+.foto{text-decoration:none;font-size:16px;margin-right:6px;padding:2px 4px;border-radius:6px;background:var(--acc2)}.firma{font-size:11px;color:var(--mut);margin-left:6px;font-style:italic}
+</style>
+</head>
+<body>
+<header><h1>Peyzaj Teklif Hesaplayıcı</h1><p>Bitki fiyatları: enfidan.com, 14.11.2026 (452 ürün). Tüm fiyatlar KDV hariç.</p></header>
+<nav><button id="t1" class="on" onclick="tab(1)">Teklif</button><button id="t2" onclick="tab(2)">Katalog</button><button id="t3" onclick="tab(3)">Ayarlar</button></nav>
+<main>
+<section id="p1">
+ <div class="card"><h2>1. Alan</h2>
+  <div class="grid">
+   <div><label>Alan (m²)</label><input id="alan" type="number" inputmode="decimal" value="150"></div>
+   <div><label>Toprak kalınlığı (cm)</label><input id="kal" type="number" inputmode="decimal" value="13"></div>
+  </div>
+  <div class="grid" style="margin-top:10px">
+   <div><label><input type="checkbox" id="cCim" checked style="width:auto"> Çim</label></div>
+   <div><label><input type="checkbox" id="cSul" checked style="width:auto"> Otomatik sulama</label></div>
+  </div>
+ </div>
+ <div class="card"><h2>2. Ağaç / çalı ekle (adet)</h2>
+  <div class="row"><div><label>Ara (ör. çınar, zeytin, 20-25Q)</label><input id="q" placeholder="Bitki adı..."></div>
+  <div style="flex:0 0 120px"><label>Tür</label><select id="qt"><option value="">Hepsi</option></select></div></div>
+  <div id="res" class="res hide"></div>
+  <div id="sel" style="margin-top:10px"></div>
+  <div id="agWarn" class="warn"></div>
+ </div>
+ <div class="card"><h2>Teklif</h2><table id="ozet"></table></div>
+ <div class="card"><h2>Tedarikçi sipariş listesi <span class="mut">(sadece sende kalır)</span></h2><textarea id="sip" style="min-height:120px"></textarea>
+  <div style="margin-top:8px"><button class="btn sec" onclick="kopya('sip')">Kopyala</button></div></div>
+ <div class="card"><h2>WhatsApp metni (müşteriye)</h2><textarea id="wa"></textarea>
+  <div style="margin-top:8px"><button class="btn" onclick="kopya('wa')">Kopyala</button> <span id="kmsg" class="mut"></span></div></div>
+</section>
+<section id="p2" class="hide">
+ <div class="card"><h2>Katalog</h2>
+  <div class="row"><div><input id="kq" placeholder="Ara..."></div><div style="flex:0 0 120px"><select id="kt"><option value="">Hepsi</option></select></div></div>
+  <label style="margin-top:8px"><input type="checkbox" id="kst" style="width:auto"> Sadece stoktakiler</label>
+  <p class="mut" id="kcount"></p>
+  <div style="overflow:auto"><table id="ktab"></table></div>
+  <div style="margin-top:8px"><button class="btn sec" onclick="csv()">Tümünü CSV olarak kopyala</button> <span id="cmsg" class="mut"></span></div>
+ </div>
+</section>
+<section id="p3" class="hide">
+ <div class="card"><h2>Birim fiyatlar (işçilik dahil)</h2>
+  <div class="grid">
+   <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" value="1500"></div>
+   <div><label>Çim (TL/m²)</label><input id="fCim" type="number" value="190"></div>
+   <div><label>Sulama (TL/m²)</label><input id="fSul" type="number" value="320"></div>
+   <div><label>Tır nakliyesi (TL/sefer)</label><input id="fTN" type="number" value="19000"></div>
+   <div><label>Tır kapasitesi (m³)</label><input id="fTK" type="number" value="22"></div>
+   <div><label>Küçük araç nakliyesi (TL/sefer)</label><input id="fKN" type="number" value="9000"></div>
+   <div><label>Küçük araç sınırı (m³ ve altı)</label><input id="fKK" type="number" value="10"></div>
+   <div><label>Bitki nakliyesi (TL/iş, sabit)</label><input id="fBN" type="number" value="10000"></div>
+   <div><label>Bitki kâr payı (%)</label><input id="fPay" type="number" value="25"></div>
+   <div><label>Ağaç dikim işçiliği (TL/adet)</label><input id="fDA" type="number" value="1000"></div>
+   <div><label>Çalı dikim işçiliği (TL/adet)</label><input id="fDC" type="number" value="130"></div>
+   <div><label>Ağaç sınırı (m² başına 1 ağaç)</label><input id="fLim" type="number" value="10"></div>
+  </div>
+  <button class="btn sec" onclick="sifirla()">Varsayılan fiyatlara dön</button>
+ </div>
+ <div class="card"><h2>Yeni firma fiyat listesi ekle</h2>
+  <p class="mut">Firmadan gelen listeyi her satıra bir bitki olacak şekilde yapıştır: <b>Bitki adı ; Fiyat ; Tür</b> (Tür: Ağaç, Palmiye, İbreli, Çalı, Sarmaşık, Çim-Saz). Örnek: <i>Çınar 18-20Q ; 3200 ; Ağaç</i></p>
+  <div class="grid"><div><label>Firma adı</label><input id="ekFirma" placeholder="ör. Sakura Fidancılık"></div><div><label>Firma telefon/site</label><input id="ekIlet" placeholder="ör. 0532 366 42 26"></div></div>
+  <textarea id="ekListe" style="min-height:120px;margin-top:8px" placeholder="Çınar 18-20Q ; 3200 ; Ağaç"></textarea>
+  <div style="margin-top:8px"><button class="btn" onclick="ekle_liste()">Listeyi ekle</button> <button class="btn sec" onclick="firmaSil()">Bu firmanın listesini sil</button> <span id="ekmsg" class="mut"></span></div>
+  <p class="mut" id="ekOzet"></p>
+  <p class="mut">Bitki pay, enfidan perakende fiyatının üstüne eklenir ve müşteriye ayrı satır olarak gösterilmez. Değerler bu tarayıcıda saklanır.</p>
+ </div>
+</section>
+</main>
+<div id="modal" class="hide" onclick="this.classList.add('hide')"><div class="box" onclick="event.stopPropagation()"><img id="mImg" alt=""><div class="cap"><b id="mAd"></b><div class="mut" id="mFiyat"></div><div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="$('modal').classList.add('hide')">Kapat</button><a id="mBuyuk" class="btn sec" target="_blank" rel="noopener" style="text-decoration:none">Sitede büyük aç</a></div></div></div></div>
+<script>
+const RAW=`Gold Rider Leylandi 200 cm Üzeri – 25 Litre Saksı|2000|İbreli|||25|1
+Çınar Ağacı 25-30 Q – 45 Litre Saksı|8000|Ağaç||25-30|45|1
+Çınar Ağacı 20-25 Q – 45 Litre Saksı|5000|Ağaç||20-25|45|1
+Katalpa Ağacı 200-250 cm – 25 Litre Saksı|1500|Ağaç|200-250||25|1
+Washington Palmiye 250 cm Gövde Boyu – 100 Litre Saksı|20000|Palmiye|||100|1
+Salkım Ortanca 30-40 cm – 5 Litre Saksı|500|Çalı|30-40||5|1
+Osmanthus Kokulu Çalı 40-60 cm Çap – 45 Litre Saksı|1500|Çalı|40-60||45|1
+Juniperus Blue Star Ardıç 20-30 cm Çap – 10 Litre Saksı|500|İbreli|20-30||10|1
+Cycas Palmiyesi 80-100 cm – 35 Litre Saksı|5000|Palmiye|80-100||35|1
+Cycas Palmiyesi (Sikas) – 15 Litre Saksı|3000|Palmiye|||15|1
+Cycas Palmiyesi (Sikas) – 5 Litre Saksı|2000|Palmiye|||5|1
+Cycas Palmiyesi – 3 Litre Saksı|1000|Palmiye|||3|1
+Bonsai Zeytin Ağacı 200-250 cm – 110 Litre Saksı|20000|Ağaç|200-250||110|1
+Doğal Zeytin Ağacı 10 Yaş – 125-150 cm, 70 Litre Saksı|8000|Ağaç|125-150||70|1
+Yayılıcı Biberiye 15-20 cm – 2 Litre Saksı|150|Çalı|15-20||2|1
+Altuni Top Mazı 20-30 cm – 2 Litre Saksı|200|İbreli|20-30||2|1
+Sütun Porsuk 175-200 cm – 45 Litre Saksı|10000|İbreli|175-200||45|1
+Sütun Porsuk 150-175 cm – 45 Litre Saksı|7500|İbreli|150-175||45|1
+Juniperus Stricta Ardıç 20-30 cm – 2 Litre Saksı|175|İbreli|20-30||2|1
+Pittosporum Yıldız Çalısı 40-60 cm – 5 Litre Saksı|250|Çalı|40-60||5|1
+Piramit Alacalı Süs İğdesi 200-250 cm – 90 Litre Saksı|4000|Çalı|200-250||90|1
+Piramit Defne Ağacı 150-175 cm – 45 Litre Saksı|2000|Çalı|150-175||45|1
+Loropetalum Piramit 100cm 10 Litre|1000|Çalı|||10|1
+Büyük Portakal Ağacı 40-45 Q 90 Litre Saksı|8000|Ağaç||40-45|90|1
+Büyük Mandalina Ağacı 35-40Q 55 LT Saksı|7000|Ağaç||35-40|55|1
+Kalın Gövdeli Limon Ağacı 25-30Q 44 Litre Saksı|5000|Ağaç||25-30|44|1
+Mavi Yuka, Yucca Rostrata 40-50cm Gövde Boyu Kalın|20000|Palmiye|40-50|||1
+Mavi Yuka, Yucca Rostrata 20-30cm Gövde Boyu|10000|Palmiye|20-30|||1
+Amerikan Sarmaşığı 200-250cm 15 Litre|750|Sarmaşık|200-250||15|1
+Altuni Top mazı, 30-40 cm Çap 3 Litre|200|İbreli|30-40||3|1
+Arap Yasemini 250cm+ 5 Litre|450|Sarmaşık|||5|1
+Arap Yasemini 300-350cm|1000|Sarmaşık|300-350|||1
+Yeşil Mavi Agave 15-20cm|200|Çim-Saz|15-20|||1
+Yeşil Mavi Agave 30-40cm|600|Çim-Saz|30-40|||1
+Stricta Totem Servi 250-300cm|3000|İbreli|250-300|||1
+Mimoza 250-300 cm tijli|3500|Ağaç|250-300|||1
+Alacalı Agave 15-20cm Boy 2 Litre Saksı|200|Çim-Saz|15-20||2|1
+Alacalı Agave 30-40cm Boy 10 Litre Saksı|600|Çim-Saz|30-40||10|1
+Boylu Bambu 100-150cm 15 Litre|750|Çim-Saz|100-150||15|1
+Yeşil Mavi Agave 40-60cm Boy 20 Litre|1000|Çim-Saz|40-60||20|1
+Boylu Bambu 150-200cm|1500|Çim-Saz|150-200|||1
+Himalaya Sediri (Cedrus Deodora) 250-300cm 45 Litrelik saksı|3000|İbreli|250-300||45|1
+Top Şimşir 50-60cm Çap 25 Litre|1500|Çalı|50-60||25|1
+Dişbudak Raywood 20-25Q|12000|Ağaç||20-25||1
+Dişbudak Raywood 16-18Q|4500|Ağaç||16-18||1
+Dişbudak Altena 10-12Q|2000|Ağaç||10-12||1
+Dişbudak Altena 12-14Q|2500|Ağaç||12-14||1
+Altuni Taflan 40cm+ 2 Litre saksı|125|Çalı|||2|1
+Minyatür Bonsai Zeytin 10 Yıllık 70 Litre|8000|Ağaç|||70|1
+Bonsai Zeytin 20-30 Yıllık 100-125 Litre|15000|Ağaç|||125|1
+Cycas (Sikas) Palmiyesi Gövde Boyu 60-70cm|15000|Palmiye|60-70|||1
+Cycas (Sikas) Palmiyesi Gövde Boyu 50-60cm|12000|Palmiye|50-60|||1
+Baston Gül Kırmızı 125-150cm|1250|Diğer|125-150|||1
+Baston Gül Beyaz 125-150cm|1250|Diğer|125-150|||1
+Alev Ağacı 20-25Q 90 Litre Saksı|20000|Ağaç||20-25|90|1
+Alev Ağacı 18-20Q 55 Litre Saksı|15000|Ağaç||18-20|55|1
+Alev Ağacı 16-18Q 55 Litre Saksı|10000|Ağaç||16-18|55|1
+Atlas Sediri 20-25Q 3-4 Metre Boy|10000|İbreli||20-25||1
+Atlas Sediri 18-20Q 3-4 Metre Boy|8000|İbreli||18-20||1
+3 Top Limon Servi 175-200cm|3500|İbreli|175-200|||1
+Sarmaşık Hanımeli 150-200cm Boy|400|Sarmaşık|150-200|||1
+Piramit Boylu Alev 175-200cm|2500|Çalı|175-200|||1
+Piramit Bravo Taflan 80-100cm|750|Çalı|80-100|||1
+Piramit Defne 300-350cm 90 Litre Dolgun|5000|Çalı|300-350||90|1
+Altuni Top Mazı 40-60cm Çap|600|İbreli|40-60|||1
+Tek Top Leylandi 40-60cm|1500|İbreli|40-60|||1
+Tijli Tek Top Alev 14-16Q|4000|Ağaç||14-16||1
+Ilex x altaclerensis 'Golden King' 60-80cm Top|4000|Çalı|60-80|||1
+Büyük Çınar 35-40Q 5-6 Metre Boy|15000|Ağaç||35-40||1
+Büyük Çınar 30-35Q 5-6 Metre Boy|12000|Ağaç||30-35||1
+Çınar Yapraklı Akçaağaç 25-30Q 5 Metre|15000|Ağaç||25-30||1
+Çınar Yapraklı Akçaağaç 20-25Q 5 Metre|12000|Ağaç||20-25||1
+Dağ Akçaağaç 25-30Q 5 Metre|15000|Ağaç||25-30||1
+Dağ Akçaağaç 20-25Q 5 Metre|12000|Ağaç||20-25||1
+Lale Ağacı (Liriodendron Tulipifera) 25-30Q 5 Metre|15000|Ağaç||25-30||1
+Lale Ağacı (Liriodendron Tulipifera) 20-25Q 5 Metre|10000|Ağaç||20-25||1
+Süs Eriği 20-25Q Prunus Cerasifera Pissardii Nigra|10000|Ağaç||20-25||1
+Gladiçya (Gleditsia) 25-30Q 4-5 Metre|13000|Ağaç||25-30||1
+Gladiçya (Gleditsia) 20-25Q 4-5 Metre|8000|Ağaç||20-25||1
+Huş Betula 20-25Q Kalınlık|6000|Ağaç||20-25||1
+Huş Betula 18-20Q Kalınlık|6000|Ağaç||18-20||1
+Süs Kirazı (Prunus serrulata) 18-20Q|7000|Ağaç||18-20||1
+Süs Kirazı (Prunus serrulata) 16-18Q|5000|Ağaç||16-18||1
+Süs Kirazı (Prunus serrulata) 14-16Q|4000|Ağaç||14-16||1
+Süs Kirazı (Prunus serrulata) 12-14Q|3000|Ağaç||12-14||1
+Spiral Limon Servi 150-200cm|4000|İbreli|150-200|||1
+Top Şimşir 80-100cm|4000|Çalı|80-100|||1
+Piramit Şimşir 125-150cm|6000|Çalı|125-150|||1
+Piramit Defne 1 Metre (Laurus Nobilis Pyramidalis)|750|Çalı||||1
+Piramit Alev 250-300cm|5000|Çalı|250-300|||1
+Piramit Alev 200-250cm|4000|Çalı|200-250|||1
+Piramit Alev 150-200cm|3000|Çalı|150-200|||1
+Magnolia Grandiflora 200-250cm (Yaprak dökmeyen Manolya)|10000|Ağaç|200-250|||1
+Magnolia Grandiflora 175-200cm (Yaprak dökmeyen Manolya)|8000|Ağaç|175-200|||1
+Piramit İlex 125-150cm|5000|Çalı|125-150|||1
+Piramit İlex 100-125cm|4000|Çalı|100-125|||1
+Sarı Gövdeli Dişbudak (Fraxinus 'Jaspidea') 18-20Q|5500|Ağaç||18-20||1
+Sarı Gövdeli Dişbudak (Fraxinus 'Jaspidea') 16-18Q|4500|Ağaç||16-18||1
+Sarı Gövdeli Dişbudak (Fraxinus 'Jaspidea') 14-16Q|3500|Ağaç||14-16||1
+Mabet Ağacı (Ginko Biloba) 25-30Q|20000|Ağaç||25-30||1
+Mabet Ağacı (Ginko Biloba) 20-25Q|15000|Ağaç||20-25||1
+Crimson King 200cm 35 Litrelik Saksı|7000|Ağaç|||35|1
+Manolya Yaprak Dökmeyen 1 Metre Üzeri|6000|Ağaç||||1
+Mimoza Kokulu Çiçekli 2 Metre|750|Ağaç||||1
+Washingtonia Spp. Gövde Boyu 3 Metre|21000|Palmiye||||1
+Washingtonia Spp. Gövde Boyu 2 Metre|14000|Palmiye||||1
+Washingtonia Spp. 1 Metre Gövde Boyu|7000|Palmiye||||1
+Sütun Porsuk 125-150cm (Taxus Baccata Fastigiata Robusta)|5000|İbreli|125-150|||1
+Piramit Ligüstrüm Texanum 150cm|4000|Çalı||||1
+Tüylü Palmiye Ufak|150|Palmiye||||1
+Ponpon Leylandi 200cm|4500|İbreli||||1
+Büyük Bonsai Zeytin 50-60 Yıllık|45000|Ağaç||||1
+Blue Arrow 60-80cm|200|İbreli|60-80|||1
+Blue Arrow 40-60cm|150|İbreli|40-60|||1
+Ponpon Arizona Mavi Servi 200cm|4500|İbreli||||1
+3 Top Arizona Mavi Servi 150-200cm|3000|İbreli|150-200|||1
+Altuni Smargat Mazı 100cm|600|İbreli||||1
+Arap Yasemini 200cm üzeri|250|Sarmaşık||||1
+Mavi Yuka, Yucca Rostrata 60-80cm Çap|15000|Palmiye|60-80|||1
+Arap Yasemini 1 Metre Potlarda|80|Sarmaşık||||1
+Top Taflan 60-80cm Çap 45 Litre|2000|Çalı|60-80||45|1
+Piramit Şimşir 2 metre üzeri|15000|Çalı||||1
+Sunkist Mazı 20-30cm Çap|150|İbreli|20-30|||1
+Top Loropetalum 60-80cm 25 Clt|2500|Çalı|60-80||25|1
+Piramit Loropetalum 100-125cm|2500|Çalı|100-125|||1
+Dekoratif Limon Süs Limonu 35-40Q Çap|12000|Ağaç||35-40||1
+Altuni Smargat Mazı 20-30cm 3 litre|150|İbreli|20-30||3|1
+Mugo Çamı (Pinus Mugo) 40-60cm çap 45 Litre|9000|İbreli|40-60||45|1
+Bodur Mavi Ladin 40-60cm çap 45 Litre|9000|İbreli|40-60||45|1
+Bonsai Zeytin 290 Litre 40-50 Yaş|30000|Ağaç|||290|1
+Bonsai Zeytin 70 Litre 125-150cm|10000|Ağaç|125-150||70|1
+Bonsai Zeytin 50 Litre 100-125cm|9000|Ağaç|100-125||50|1
+Sütun Taflan 40-50cm 5 Litre|250|Çalı|40-50||5|1
+Süs Eriği Yarım Tijli 16-18Q Kalınlık|4500|Ağaç||16-18||1
+Sarı Sürünücü Ardıç 20-30cm Çap (Yellow Chip)|200|İbreli|20-30|||1
+Mavi Sürünücü Ardıç 60-80cm çap (Blue Chip)|1500|İbreli|60-80|||1
+Smargat Mazı 60-80cm|200|İbreli|60-80|||1
+Smargat Mazı 40-60cm|150|İbreli|40-60|||1
+Skyrocket Ardıç 175-200cm Boy|750|İbreli|175-200|||0
+Skyrocket Ardıç 150-175cm Boy|500|İbreli|150-175|||1
+Skyrocket Ardıç 125-150cm Boy|400|İbreli|125-150|||1
+Loropetalum Top 60-80cm|2500|Çalı|60-80|||1
+Piramit Altuni Taflan 100-125cm|1500|Çalı|100-125|||1
+Piramit Altuni Taflan 80-100cm|1250|Çalı|80-100|||1
+Piramit Altuni Taflan 125-150cm|3500|Çalı|125-150|||1
+Pampas Otu 10 Litre 1 Metre Boyunda|350|Çim-Saz|||10|1
+Fırça Çalısı (Callistemon) 20-30cm 1,5 litre saksı|90|Çalı|20-30||1.5|1
+Defne 60-80cm boy 3 litre|125|Çalı|60-80||3|1
+Spiral Arizona 150-200cm|3500|İbreli|150-200|||1
+Karayemiş (Kısa Tijli) 14-16Q 2 Metre|3000|Ağaç||14-16||1
+Karayemiş Piramit (Prunus Laurocerasus) 230-300cm|4000|Ağaç|230-300|||1
+Goldrider 150-175 cm Boy|700|İbreli|150-175|||1
+Goldrider 40-60cm|175|İbreli|40-60|||1
+Çıtır Taflan Yeşil Beyaz Alacalı 1,5 Litre 20-30cm|100|Çalı|20-30||1.5|1
+Leylandi İthal Torflu 4 metre üzeri|5000|İbreli||||0
+Leylandi 35 Litre 250-300cm|1500|İbreli|250-300||35|1
+Boylu Alev 100cm üzeri Çok dallı 10 Litre|300|Çalı|||10|1
+Boylu Alev 100cm üzeri Çok dallı 5 Litre|200|Çalı|||5|1
+Festuca Glauca, Mavi Çim Yumağı 20-30cm Çap|100|Çim-Saz|20-30|||1
+Defne Laurus Nobilis 175-200 CM 25 Litre|750|Çalı|175-200||25|0
+Defne Laurus Nobilis 150-175 CM 25 Litre|750|Çalı|150-175||25|1
+Bodur Alev 30-40cm boy 5 Litre|250|Çalı|30-40||5|1
+Blue Arrow 100-125cm|500|İbreli|100-125|||1
+Blue Arrow 20-30cm|80|İbreli|20-30|||0
+Büyük Nar Ağacı, Süs Narı 10-15 yıllık 100 Litre|10000|Ağaç|||100|1
+Süs Eriği 18-20Q Prunus Cerasifera Pissardii Nigra|12500|Ağaç||18-20||1
+Süs Eriği 16-18Q Prunus Cerasifera Pissardii Nigra|6500|Ağaç||16-18||1
+Süs Eriği 14-16Q Prunus Cerasifera Pissardii Nigra|5000|Ağaç||14-16||1
+Süs Eriği 12-14Q Prunus Cerasifera Pissardii Nigra|3000|Ağaç||12-14||1
+Oya Ağacı, Lagerstroemia indica 16-18Q|4500|Ağaç||16-18||1
+Tohumdan Mavi Ladin 200-250cm|6000|İbreli|200-250|||1
+Tohumdan Mavi Ladin 150-200cm|4000|İbreli|150-200|||1
+Erguvan, Cercis siliquastrum 18-20Q|6000|Ağaç||18-20||1
+Erguvan, Cercis siliquastrum 16-18Q|4500|Ağaç||16-18||1
+Erguvan, Cercis siliquastrum 14-16Q|4000|Ağaç||14-16||1
+Büyük Devasa Ihlamur 5 Metre 80-100cm Gövde Kalınlığı|150000|Ağaç||||1
+Batı Ladini (Picea occidentalis) 150-200cm|3500|İbreli|150-200|||1
+Aşılı Mavi Ladin 300-350cm|17500|İbreli|300-350|||1
+Aşılı Mavi Ladin 250-300cm|15000|İbreli|250-300|||1
+Aşılı Mavi Ladin 200-250cm|12500|İbreli|200-250|||1
+Süs Elması, Malus, 16-18Q|5000|Ağaç||16-18||1
+Süs Elması, Malus, 14-16Q|4000|Ağaç||14-16||1
+Süs Elması, Malus, 12-14Q|3000|Ağaç||12-14||1
+At Kestanesi (Aesculus hippocastanum) 16-18Q|3500|Ağaç||16-18||1
+At Kestanesi (Aesculus hippocastanum) 14-16Q|3000|Ağaç||14-16||1
+Prunus cerasifera, Çalı Süs Eriği 125-150cm|1500|Ağaç|125-150|||1
+Prunus serrulata, Süs Kirazı Yarım Tijli|1250|Ağaç||||1
+Oya Ağacı, Lagerstroemia indica 14-16Q|3500|Ağaç||14-16||1
+Salkım Söğüt (Salix babylonica) 18-20Q|4500|Ağaç||18-20||1
+Salkım Söğüt (Salix babylonica) 16-18Q|4000|Ağaç||16-18||1
+Osmanlı Çimi (Ophiopogon japonicus), 45'li viyollerde|450|Çim-Saz||||0
+Kelebek Çalısı, Buddleja davidii 60-80cm 10 litre|250|Çalı|60-80||10|1
+Boylu Gravilla Juniperina 30-40 cm 3 litre|250|Çalı|30-40||3|1
+Bodur Gravilla 30-40cm çap 3 litre|250|Çalı|30-40||3|1
+Göknar Abies 3 metre boy 90 Litre Saksı|6000|İbreli|||90|1
+Batı Ladini, Picea occidentalis 2-3 Metre|5000|İbreli||||1
+Amerikan Sarmaşığı 100-150cm|250|Sarmaşık|100-150|||1
+Top Akasya, Robinia 'Umbraculifera' 18-20Q|5000|Ağaç||18-20||1
+Magnolia grandiflora 'Gallisoniensis' 3 metre|12000|Ağaç||||1
+Top Goldrider 80-100cm çap|3500|İbreli|80-100|||1
+Morus nigra 'Pendula' (Ters Dut) 18-20Q|6000|Ağaç||18-20||1
+Tek Top Mavi Servi Arizona 100cm|2000|İbreli||||1
+Elaeagnus x ebbingei 'Limelight' 40-60cm|150|Çalı|40-60|||0
+Juniperus communis 'Stricta' 80-100cm Büyük boy|1500|İbreli|80-100|||1
+Spiral Leylandi 150-200cm|4000|İbreli|150-200|||1
+Top Şimşir 40cm üzeri Çap|600|Çalı||||1
+Kırmızı Amerikan Meşesi 20-25Q|8000|Ağaç||20-25||0
+Amerikan Sığla, Liquidambar styraciflua 20-25Q|8000|Ağaç||20-25||1
+Amerikan Sığla, Liquidambar styraciflua 18-20Q|6000|Ağaç||18-20||1
+Amerikan Sığla, Liquidambar styraciflua 16-18Q|4500|Ağaç||16-18||1
+Acer Negundo Flamingo 25-30Q Saksılı|15000|Ağaç||25-30||1
+Acer Negundo Flamingo 20-25Q Saksılı|8000|Ağaç||20-25||1
+Ihlamur, Tilia 18-20Q Kalınlık|6000|Ağaç||18-20||1
+Ihlamur, Tilia 16-18Q Kalınlık|4500|Ağaç||16-18||1
+Ihlamur, Tilia 14-16Q Kalınlık|4000|Ağaç||14-16||1
+Ihlamur, Tilia 12-14Q Kalınlık|3000|Ağaç||12-14||1
+Pon Pon Arizona 2-3 metre|3500|İbreli||||0
+Oya Ağacı Çalı Formlu 2-3 metre|4000|Ağaç||||1
+Mor Salkım 3-4 metre bambulu|2000|Sarmaşık||||1
+Mavi Ladin Tek Top 100-125cm|4000|İbreli|100-125|||1
+Japon Şemsiyesi, Cyperus alternifolius 125-150cm|600|Çim-Saz|125-150|||1
+Camellia japonica 80-100cm|4000|Çalı|80-100|||1
+Ilex crenata (Japon İlexi) 30-40cm çap|275|Çalı|30-40|||0
+Cycas (Sikas) Palmiyesi Gövde Boyu 40-50cm|10000|Palmiye|40-50|||1
+Cycas (Sikas) Palmiyesi Gövde Boyu 30-40cm|8500|Palmiye|30-40|||1
+Cordyline australis 'Pink Passion' 40-60cm|750|Çim-Saz|40-60|||1
+Carex 40-60cm 15 Litre|250|Çim-Saz|40-60||15|1
+Biberiye Büyük Boy 40-60cm|250|Çalı|40-60|||1
+Baston Gül 100-125cm|1250|Diğer|100-125|||1
+Aşılı Mavi Ladin 100-125 cm|5500|İbreli|100-125|||1
+Arap Yasemini 4-5 metre|2750|Sarmaşık||||1
+Agapanthus ince yapraklı|250|Çalı||||1
+Agave americana variegata 30-40cm boy 35 litre|1500|Çim-Saz|30-40||35|1
+Agave Amerikana 45 Litre 60-80cm boy|4000|Çim-Saz|60-80||45|1
+Leylandi 3 metre üzeri 45 litre Saksı|3000|İbreli|||45|1
+Weigela 'Rainbow' Alacalı Gelin Tacı 30-40cm 3 Clt|150|Çalı|30-40||3|0
+Photinia 'Red Robin', Boylu Alev 80-100cm|250|Çalı|80-100|||1
+Tilia (Ihlamur) 100-125cm Boy 3 Clt|400|Ağaç|100-125||3|1
+Laurus Nobilis Defne 20-30cm Boy 3 Litre Saksı|70|Çalı|20-30||3|0
+Carex oshimensis 'Evergold' 20-30cm 1,5 Clt|70|Çim-Saz|20-30||1.5|1
+Sarı Alacalı Carex 20-30cm çap 1,5 Litre Saksı|70|Çim-Saz|20-30||1.5|1
+Leylandi 'Gold Rider' 350-400cm|5000|İbreli|350-400|||0
+Cupressus Arizonica, Mavi Servi 175-200cm|500|İbreli|175-200|||1
+Sütun Porsuk 80cm|1250|İbreli||||1
+Phormium Tenax Variegata 40-60cm 3 Litre|300|Çim-Saz|40-60||3|1
+Phormium Bronz Yeni Zelanda Keteni 40-60cm 3 litre|300|Çim-Saz|40-60||3|1
+Nandina Domestica Seika Obsession 30-40cm 3 Litre|250|Çalı|30-40||3|1
+Nandina domestica 'Gulf Stream' 30-40 3 Litre Saksı|250|Çalı|||3|1
+Nandina Domestica Fire Power Nana 60-80 çap 35 Litre|1000|Çalı|||35|1
+Berberis thunbergii 'Maria' 40-60cm 10 Litre|500|Çalı|40-60||10|0
+Mahonia Winter Sun 60-80cm 10 litre|400|Çalı|60-80||10|1
+Lonicera sp. Çalı hanımeli 20-30cm 2 litre|100|Çalı|20-30||2|1
+Ilex 'Golden King' 60-80cm 10 litre saksı|500|Çalı|60-80||10|0
+Sarmaşık hanımeli 2-3 metre 15 litre|1000|Sarmaşık|||15|0
+Euonymus japonicus Bravo Taflan 40-50cm 10 litre|300|Çalı|40-50||10|1
+Bodur Ateş Dikeni (Pyracantha Nana) 20-30cm 3 litre|150|Çalı|20-30||3|0
+Bodur Berberis 30-40cm 3 litre|150|Çalı|30-40||3|1
+Berberis thunbergii 'Red Rocket' 30-40cm 3 litre|150|Çalı|30-40||3|1
+Pittosporum 30-40cm Çap 3 Litre|150|Çalı|30-40||3|1
+Bravo Taflan 20-30cm 1,5 Litre|80|Çalı|20-30||1.5|1
+Piramit Bravo Taflan 150-175cm|4000|Çalı|150-175|||1
+Aucuba Japonica 60-80cm|250|Çalı|60-80|||1
+Arap Yasemini 100-150cm|150|Sarmaşık|100-150|||1
+Piramit Porsuk 200-250cm|12000|İbreli|200-250|||1
+Leylandi 200-250cm Boy|600|İbreli|200-250|||1
+Bonsai Ponpon Zeytin 30-40 yıllık 250 Litre|25000|Ağaç|||250|1
+Çınar Ağacı 18-20Q Saksılı|3500|Ağaç||18-20||1
+Çınar Ağacı 16-18Q Saksılı|3000|Ağaç||16-18||1
+Çınar Ağacı 14-16Q Saksılı|2500|Ağaç||14-16||1
+Pampas Otu 15 litre Büyük Boy|600|Çim-Saz|||15|1
+Boylu Bambu 125-150cm 35 litre|1000|Çim-Saz|125-150||35|1
+Bodur Ateş Dikeni 20-30cm 3 clt|150|Çalı|20-30||3|0
+Kartopu Viburnum Lucidum 20-30cm|50|Çalı|20-30|||0
+Batı Ladini 3 metre|4000|İbreli||||0
+Atlas Sediri 16-18Q 3 Metre Boy|6000|İbreli||16-18||0
+Aşılı Mavi Ladin 150-200cm|10000|İbreli|150-200|||1
+Agapanthus Sevgi Çiçeği 5 lt Saksı|250|Çalı|||5|1
+Limon Servi 125cm 10 litre saksı|350|İbreli|||10|1
+Kartopu Viburnum Lucidum 60-80cm|150|Çalı|60-80|||1
+Sürünücü Ardıç Yeşil 20-30cm|200|İbreli|20-30|||1
+Skyrocket 60-80cm 3 litre|175|İbreli|60-80||3|1
+Limon Servi 60-80cm 3 Lt Saksı|200|İbreli|60-80||3|0
+Leylandi 80-100cm 5 Lt Saksı|200|İbreli|80-100||5|1
+Top Taflan 80-100cm Çap|3000|Çalı|80-100|||1
+Blue Arrow 80-100cm|400|İbreli|80-100|||1
+Şimşir 20-30cm 1,5 litre 2-3'lü Ekim|100|Çalı|20-30||1.5|1
+Bodur Alev 20-30 cm boy 1.5 litrelik saksı|125|Çalı|20-30||1.5|0
+Altuni Piramit Mazı 80-100 cm|400|İbreli|80-100|||0
+Smargat Mazı Dolgun 1 metre Üzeri|450|İbreli||||1
+Arizona Mavi Servi 150-175cm 15 Litre|400|İbreli|150-175||15|1
+Sütun Taflan 40-60cm boy 10 Litre|350|Çalı|40-60||10|1
+Ponpon Leylandi 200-250 cm|4500|İbreli|200-250|||1
+Pittosporum 80-100 cm çap|1500|Çalı|80-100|||1
+Goldrider 60-80cm 5 litre saksı|250|İbreli|60-80||5|1
+3 Top Arizona 200-250cm|4500|İbreli|200-250|||1
+3 Top Leylandi 200-250cm|4500|İbreli|200-250|||1
+Spiral Leylandi 200-250cm Boy|4000|İbreli|200-250|||1
+Altuni Taflan 40-60 cm 7 litre Dolgun|250|Çalı|40-60||7|1
+Altuni Taflan 30-40cm 1.5 litre|70|Çalı|30-40||1.5|1
+Leylandi 100-130 cm boy|225|İbreli|100-130|||1
+Piramit Şimşir 1 metre üzeri|4000|Çalı||||1
+Zeytin 15-20 senelik Bodur Bonsai|15000|Ağaç||||0
+Ligüstrüm 100cm 45 Litre Dolgun|500|Çalı|||45|1
+Leylandi 175-200cm|500|İbreli|175-200|||1
+Leylandi 150-175 cm 5-7 Litre|350|İbreli|150-175||7|1
+Smargat Mazı 80-100cm|350|İbreli|80-100|||1
+Top Taflan (Yeşil) 30-40cm çap|300|Çalı|30-40|||0
+Mavi Sürünücü Ardıç 30-40cm çap|200|İbreli|30-40|||1
+Skyrocket 250-300cm 35 Litre|1750|İbreli|250-300||35|1
+Top Şimşir Rotundifolia 30-40 cm 15 litre|450|Çalı|30-40||15|1
+Osmanlı Şimşiri 20-30 cm çap 13 litre|350|Çalı|20-30||13|1
+Lonicera 40-60 çap|300|Çalı||||0
+Leylandi 100-125 cm|225|İbreli|100-125|||1
+Kathy Taflan 20-30cm boy 5 litre|100|Çalı|20-30||5|0
+Top Şimşir Faulkner 30-40cm çap|450|Çalı|30-40|||1
+Abelya 20-30cm çap 3 litre|150|Çalı|20-30||3|1
+Leylandi 125-150 cm 5 Litre|275|İbreli|125-150||5|1
+Arizona Mavi Servi 125-150 cm|350|İbreli|125-150|||1
+Tüylü Palmiye Gövde Boyu 275-300cm|13750|Palmiye|275-300|||1
+Tüylü Palmiye Gövde Boyu 250-275cm|12500|Palmiye|250-275|||1
+Tüylü Palmiye Gövde Boyu 225-250cm|11250|Palmiye|225-250|||1
+Top Şimşir 60-80 cm Çap|3000|Çalı|60-80|||1
+Yaprak Dökmeyen Manolya 300-350 cm|20000|Ağaç|300-350|||1
+Limon Servi 200-250cm (Goldcrest)|600|İbreli|200-250|||0
+Mavi Himalaya Sediri 125-150cm Boy|750|İbreli|125-150|||1
+Mavi Himalaya Sediri 200-250cm Boy|1500|İbreli|200-250|||1
+Batı Ladini, Picea Abies 2-3 Metre|1250|İbreli||||0
+Goldrider 100-125 Cm Dolgun Formlu|450|İbreli|100-125|||1
+Altuni Top Mazı 30-40 cm Çap 7 Litre|400|İbreli|30-40||7|1
+Ligüstrüm 60-80 cm boy|60|Çalı|60-80|||0
+Ligüstrüm Dolgun 100cm|90|Çalı||||0
+Kartopu Viburnum Lucidum 100-125cm 7 Litre|350|Çalı|100-125||7|1
+Tijli Süs Eriği (Pissardii Nigra)|1000|Ağaç||||0
+Tüylü Palmiye Gövde Boyu 200-225cm|10000|Palmiye|200-225|||1
+Totem Servi Sarı 200-250cm|2500|İbreli|200-250|||0
+Ligüstrüm 40-60 cm|50|Çalı|40-60|||1
+Altuni Piramit Mazı 60-80 cm|250|İbreli|60-80|||0
+Yeşil Sürünücü Ardıç 30-40cm Çap|200|İbreli|30-40|||1
+Thuja 'Golden Tuffet' 30-40 cm boy ve çap|750|İbreli|30-40|||1
+Blue Arrow 30-40 cm Mavi dik ardıç|100|İbreli|30-40|||0
+Juniperus Stricta Ardıç 30-40 cm 5 Litre Saksı|350|İbreli|30-40||5|0
+Aucuba Japonica 40-60 cm|200|Çalı|40-60|||1
+Aucuba Japonica 30-40 cm|150|Çalı|30-40|||1
+Şimşir Çalı 30-40 cm boy (Rotundifolia)|150|Çalı|30-40|||1
+Limon Servi (Goldcrest) 80-100 cm|250|İbreli|80-100|||1
+Kartopu Viburnum Lucidum 80-100cm 5 Litre|250|Çalı|80-100||5|1
+Viburnum Tinus, Kış Kartopu 40-60cm|100|Çalı|40-60|||1
+Ortanca 30-40 cm Çok Dallı|150|Çalı|30-40|||1
+Goldrider 80-100 cm|350|İbreli|80-100|||1
+Leylandi 60-80 cm, Çit bitkisi|100|İbreli|60-80|||1
+Leylandi 40-60 cm, Çit bitkisi|70|İbreli|40-60|||0
+Leylandi 20-30cm|50|İbreli|20-30|||0
+Goldrider 125-150 cm boy|600|İbreli|125-150|||1
+Çınar Ağacı 12-14 Kutur 3 metre üzeri|1750|Ağaç||12-14||1
+Çınar Ağacı 10-12 Kutur 3 metre üzeri (Rootball)|1250|Ağaç||10-12||1
+Çınar Ağacı 8-10 Kutur 3 metre üzeri|1000|Ağaç||8-10||1
+Top Defne 40-60 cm çap|1000|Çalı|40-60|||1
+Piramit Defne 250-300cm|3000|Çalı|250-300|||1
+Tüylü Palmiye Gövde Boyu 1 Metre|4000|Palmiye||||1
+Ponpon Bulut Budanmış Leylandi Goldrider|5000|İbreli||||0
+Sarı Çiçekli Yasemin 200cm üzeri|700|Sarmaşık||||1
+Ortanca 20-30 cm boy 2-3 dallı|100|Çalı|20-30|||0
+Boylu Alev Çit bitkisi 40-60cm boy|100|Çalı|40-60|||1
+Physocarpus Opulifolius Diabolo 40-60cm|150|Çalı|40-60|||0
+Zakkum 60-80 cm boy 15 litrelik saksıda|500|Çalı|60-80||15|1
+Oya Çalısı (Lagerstroemia) Pembe 100-150 cm|400|Çalı|100-150|||0
+Arizona Mavi Selvi 100-125 cm|300|İbreli|100-125|||1
+Sütun Taflan (Yeşil Çıtır) 3 litre 30-40cm boy|125|Çalı|30-40||3|1
+Altuni Taflan 20-30 cm dolgun|60|Çalı|20-30|||1
+Siyah Kara Çim (Ophiopogon Nigrescens)|200|Çim-Saz||||1
+Boylu Alev 20-30 cm 1 litrelik saksılarda çok dallı|70|Çalı|20-30||1|0
+Leylandi 30-40 cm, Çit bitkisi|60|İbreli|30-40|||0
+Carex (Saz Bitkisi) 40-60 çap 15 Litre|250|Çim-Saz|||15|1
+Teucrium fruticans, Zeytin Çalısı|200|Çalı||||0
+Leylak, Syringa Meyeri Palibin|250|Çalı||||0
+Altın Çanağı 40-60 cm|90|Çalı|40-60|||0
+Abelia 'Kaleidoscope' Sarı Alacalı 15-20 cm 1,5 litre|125|Çalı|15-20||1.5|1
+Gelin Tacı (Weigela) 40-60 cm|150|Çalı|40-60|||0
+Kartopu Viburnum Opulus 60-80 cm 10 lt Saksı|500|Çalı|60-80||10|0
+Arap Yasemini 150-200cm|200|Sarmaşık|150-200|||1
+Pittosporum 20-30 cm Çap|100|Çalı|20-30|||1
+Altın Çanağı 60-80 cm|120|Çalı|60-80|||0
+Ortanca Çok Dallı 40-60 boy 5 litrelik saksı|250|Çalı|||5|1
+Şimşir (Buxus Sempervirens) Top 20-30 cm Çap|350|Çalı|20-30|||0
+Aucuba Sarı (Japon Defnesi) 20-30 cm 3 litre|125|Çalı|20-30||3|1
+Yeşil Alacalı Çıtır Taflan 15-20 cm 5 Lt|75|Çalı|15-20||5|1
+Kartopu Viburnum Lucidum 40-60 cm 3 Litre|125|Çalı|40-60||3|1
+Alacalı Abelia 1,5 litre 20-30 çap|125|Çalı|||1.5|1
+Abelia 1,5 litre 20-30 çap|125|Çalı|||1.5|1
+Euryops, Bodrum Papatyası 40cm boy 5 litre|250|Çalı|||5|1
+Loropetalum 20-30cm|175|Çalı|20-30|||1
+Phormium Tenax Orta boy 60-80cm|400|Çim-Saz|60-80|||1
+Lavanta 40-60cm|175|Çalı|40-60|||1
+Bodur Alev (Photinia) 15-20 cm boy|70|Çalı|15-20|||0
+Mor Salkım (Wisteria) Sarmaşık 80-100 cm|200|Sarmaşık|80-100|||1
+Altuni Taflan 15-20 cm boy|50|Çalı|15-20|||1
+Hedera Sarmaşık 100 cm|100|Sarmaşık||||1
+Carex 20-30 cm boy|70|Çim-Saz|20-30|||1
+Şekilli Budanmış Top Leylandi (Tek top)|3000|İbreli||||1
+Yeşil Çıtır Taflan 20-30cm|80|Çalı|20-30|||0
+Thuja Plicata Goldy 80-100cm boy|250|İbreli|80-100|||0
+Sütun Taflan 20-25cm boy|70|Çalı|20-25|||1
+Süs İğdesi 100 cm 8 Litre Altuni Yapraklı|300|Çalı|||8|1
+Sahte Keçi Sakalı 60-80cm Boy Dolgun|400|Çalı|60-80|||0
+Tüylü Palmiye Gövde Boyu 60-80cm|3000|Palmiye|60-80|||1
+Festuca Glauca (Mavi Çim) 30-40cm çap|150|Çim-Saz|30-40|||1
+Bodur Nandina 40-50cm çap duble|500|Çalı|40-50|||1
+Altuni Taflan 20-30 cm kare viyollerde|35|Çalı|20-30|||0
+Osmanlı Şimşiri 30-40cm çap 28'lik Saksı|450|Çalı|30-40|||1
+Altuni Ardıç 'Old Gold' 40-60cm çap|150|İbreli|40-60|||0
+Lavantin (Santolina) 30-40 cm|100|Çalı|30-40|||0
+Lavanta (Lavandula) 20-30cm boy|80|Çalı|20-30|||1
+Kartopu Viburnum Opulus 60-80cm 3 Litre Saksı|300|Çalı|60-80||3|1
+Karayemiş Fidanı 100-125cm boy|300|Çalı|100-125|||1
+Gelin Tacı, Weigela 'Alexandra' 40-60 cm|150|Çalı|40-60|||1
+Bodur Ateş Dikeni 40-60 cm çap 15 litre|350|Çalı|40-60||15|1
+Blue Arrow İthal Dik Mavi Ardıç 150-200cm|750|İbreli|150-200|||1
+Japon Ayvası (Bahardalı) Büyük saksı 40-60cm|150|Çalı|40-60|||1
+Japon Defnesi (Aucuba) 15-20 cm|100|Çalı|15-20|||1
+Mor Salkım Sarmaşık 80-100cm Yoğun Kokulu|200|Sarmaşık|80-100|||1
+Sarı Smargat (Altuni Smargat) Mazı 60-80cm|400|İbreli|60-80|||1
+Sarmaşık Ponpon Gül 2 metre|750|Sarmaşık||||1
+Osmanlı Şimşiri 30-40cm boy|150|Çalı|30-40|||0
+Meyland Gül 20-30cm|150|Çalı|20-30|||1
+Boylu Alev 30-40cm boy 1,3 litre|80|Çalı|30-40||1.3|0
+Altuni Taflan 40-60cm 10 Litre saksı|300|Çalı|40-60||10|1
+Bahardalı (Japon Ayvası) 40-60 cm|140|Çalı|40-60|||0
+Defne (Laurus nobilis) Çalısı 80-100 cm boy|150|Çalı|80-100|||1
+Toptan Altuni Taflan 20-30 cm 1,5 litre|60|Çalı|20-30||1.5|1
+İlex 'Golden King' 80-100 cm|500|Çalı|80-100|||1
+Kartopu Viburnum Lucidum 30-40 cm 3 Litre|100|Çalı|30-40||3|1
+Tüylü Palmiye Tam Boy 60-80cm|1000|Palmiye|60-80|||1
+Boylu Alev 60-80 cm, Boylu çit bitkisi|125|Çalı|60-80|||1
+Bodur Alev 40-50cm çap Dolgun 15 Litre|500|Çalı|40-50||15|1
+Nandina Domestica Fire Power 20-30 cm|150|Çalı|20-30|||1
+Pittosporum (Yıldız Çalısı) 40-50cm çap Duble|450|Çalı|40-50|||1
+Nandina Domestica Gulf Stream 20-30 cm boy|250|Çalı|20-30|||1
+Sarı Çıtır Taflan 20-30cm boy|75|Çalı|20-30|||1
+Sunkist Mazı 30-40 cm boy ve çap|400|İbreli|30-40|||1
+Altuni Top Mazı 30-40 cm boy|400|İbreli|30-40|||1
+Hibiscus syriacus (Hatmi) Lila 60-80cm|250|Çalı|60-80|||0
+Gümüş Çalısı (Convolvulus cneorum) 20-30cm|125|Çalı|20-30|||0
+Fırça Çalısı (Callistemon) Geniş Yapraklı 30-40cm|90|Çalı|30-40|||1
+Fırça Çalısı İnce Yapraklı 80-100cm çap|400|Çalı|80-100|||0
+Fatsia Japonica (Aralya) 3 litre 40-60 boy|200|Çalı|||3|1
+Altuni Top Mazı 'Mirjam' 15 cm boy|75|İbreli||||0
+Biberiye 20-30cm boy|125|Çalı|20-30|||1
+Abelia 'Confetti' Güzellik Çalısı 30-40 cm 3 litre|150|Çalı|30-40||3|1
+Acem Borusu (Campsis radicans) 125-150 cm|250|Sarmaşık|125-150|||0
+Acem Borusu (Campsis radicans) 100 cm üzeri|120|Sarmaşık||||0
+Nandina (Cennet Bambusu) 3 lt saksı 30-40 çap|200|Çalı|||3|1
+Ligüstrüm 30-40 cm boy|40|Çalı|30-40|||1`;
+const FIRMALAR={'enfidan.com':'https://enfidan.com'};
+let DATA=RAW.split('\n').map((l,i)=>{const f=l.split('|');return{i,ad:f[0],fiyat:+f[1],tur:f[2],boy:f[3],cap:f[4],lt:f[5],stok:f[6]==='1',firma:'enfidan.com'}});
+const IMG=["2026/11/goldrider-200cm-uzeri-5.jpg", "2026/11/cinar-9.jpg", "2026/11/cinar-2.jpg", "2026/11/catalpa-2.jpg", "2026/10/palmiye-wasingthon-250cm-4.jpg", "2026/10/yaz-ortancasi.jpg", "2026/10/osmantus-2.jpg", "2026/10/juniperus-blur-star-2.jpg", "2026/10/cycas-palmiye-35-litre.jpg", "2026/10/cycas-palmiye-15-litre-2.jpg", "2026/10/cycas-palmiye-5-litre.jpg", "2026/10/cycas-palmiye-3-litre.jpg", "2026/10/zeytin-bonsai-2-metre-5.jpg", "2026/10/dogal-zeytin-70-litre-2.jpg", "2026/10/yayilici-biberiye.jpg", "2026/10/top-mazi-2-litre-4.jpg", "2026/10/sutun-porsuk-150-175.jpg", "2026/10/sutun-porsuk-150-175-4.jpg", "2026/10/stricta-ardic-2-litre.jpg", "2026/10/pittosporum-5-litre.jpg", "2026/10/piramit-igde-90-litre-2.jpg", "2026/10/piramit-defne-35-litre.jpg", "2026/10/loropetalum-piramit-2.jpg", "2026/10/buyuk-portakal-3.jpg", "2026/10/buyuk-mandalina-3.jpg", "2026/10/buyuk-limon-3.jpg", "2026/10/mavi-yukka-rostrata-kalin-govde-2.jpg", "2026/10/mavi-yukka-rostrata-ufak-3.jpg", "2026/10/amerikan-sarmasigi.jpg", "2026/09/altuni-smargat-3-litre.jpg", "2026/09/5-litre-yasemin-3.jpg", "2026/09/3-metre-arap-yasemini-2.jpg", "2026/09/yesil-agave-ufak.jpg", "2026/09/yesil-agave-10-litre.jpg", "2026/09/totem-servi.jpg", "2026/09/mimoza-45-litre-3.jpg", "2026/08/alacali-agave-ufak.jpg", "2026/08/alacali-agave-10-litre-2.jpg", "2026/08/boylu-bambu-15-litre.jpg", "2026/07/yesil-agave-20-litre.jpg", "2026/07/boylu-bambu-35-litre-2.jpg", "2026/07/himalaya-sediri-250-300cm.jpg", "2026/07/top-simsir-50-60cm-cap-3.jpg", "2026/05/disbudak-raywood-2.jpg", "2026/05/disbudak-raywood-4.jpg", "2026/05/disbudak-altena.jpg", "2026/05/disbudak-altena.jpg", "2026/05/altuni-taflan-2-litre-3.jpg", "2026/05/zeytin-minyatur-2.jpg", "2026/05/bonsai-zeytin-125-litre-3.jpg", "2026/04/cycas-palmiye-4.jpg", "2026/04/cycas-palmiye.jpg", "2026/05/baston-gul-2.jpg", "2026/05/baston-gul-2-3.jpg", "2026/05/alev-agaci-18-20Q.jpg", "2026/05/alev-agaci-18-20Q-2-1.jpg", "2026/05/alev-agaci-18-20Q-2-1.jpg", "2026/05/atlas-sediri-18-20-3-4metre.jpg", "2026/05/atlas-sediri-18-20-3-4metre.jpg", "2026/05/3-top-limon-servi.jpg", "2026/05/sarmasik-hanimeli-200-250cm.jpg", "2026/05/piramit-alev-175-200cm.jpg", "2026/05/bravo-taflan-piramit-45-litre-2.jpg", "2026/05/piramit-defne-90litre.jpg", "2026/05/altuni-top-mazi-2.jpg", "2026/05/tek-top-leylandi.jpg", "2026/05/tijli-alev-2.jpg", "2026/05/ilex-top.jpg", "2026/05/buyuk-cinar-35-40Q-2.jpg", "2026/05/buyuk-cinar-35-40Q.jpg", "2026/05/cinar-yaprakli-akcaagac-2.jpg", "2026/05/cinar-yaprakli-akcaagac.jpg", "2026/05/dag-akca-agac.jpg", "2026/05/dag-akca-agac-2.jpg", "2026/05/lale.jpg", "2026/05/lale-1.jpg", "2026/03/sus-erigi-2-1.jpg", "2026/04/gladicya.jpg", "2026/04/gladicya-2.jpg", "2026/03/betula-hus.jpg", "2026/04/hus.jpg", "2026/04/sus-kirazi.jpg", "2026/04/sus-kirazi.jpg", "2026/04/sus-kirazi.jpg", "2026/04/sus-kirazi-2.jpg", "2026/03/spiral-limon-servi-4.jpg", "2026/03/top-simsir-buyuk.jpg", "2026/03/piramit-simsir-125-150cm-3.jpg", "2026/03/piramit-defne-1-metre-2.jpg", "2026/04/piramit-alev.jpg", "2026/03/piramit-alev.jpg", "2026/04/piramit-alev-2.jpg", "2026/03/manolya-yaprak-dokmeyen-3-2.jpg", "2026/03/manolya-yaprak-dokmeyen-5.jpg", "2026/03/ilex-piramit.jpg", "2026/04/ilex-piramit-2.jpg", "2026/03/disbudak-sari-govdeli-2.jpg", "2026/03/disbudak-sari-govdeli-3.jpg", "2026/03/disbudak-sari-govdeli-3.jpg", "2026/03/mabed-agaci-3.jpg", "2026/03/mabed-agaci-3.jpg", "2026/03/crimson-king-2.jpg", "2026/03/manolya-yaprak-dokmeyen-4.jpg", "2026/03/mimoza.jpg", "2026/03/washington-palmiye-3-metre-4.jpg", "2026/03/washington-palmiye-3-metre.jpg", "2026/03/washington-palmiye-1-metre.jpg", "2026/03/sutun-porsuk.jpg", "2026/03/piramit-ligustrum-texanum-222222222.jpg", "2026/03/palmiye-chamaerops-excelsa-2.jpg", "2026/03/leylandi-ponpon.jpg", "2026/04/bonsai-zeytin-360-litre-5.jpg", "2026/03/blue-arrow-60-80cm.jpg", "2026/03/blue-arrow-60-80cm-2.jpg", "2026/03/arizona-ponpon-2.jpg", "2026/03/arizona-3-top-2.jpg", "2026/03/altuni-smargat-mazi.jpg", "2026/03/arap-yasemini-200cm-uzeri.jpg", "2026/03/yucca-rostrata.jpg", "2026/03/yasemin-pot-2.jpg", "2026/03/top-taflan-4-1.jpg", "2026/03/piramit-simsir-buyuk-2-metre.jpg", "2026/03/sunkist-mazi-3clt.jpg", "2026/03/loropetalum-top-25clt-2.jpg", "2026/03/loropetalum-piramit-25clt.jpg", "2026/03/limon-buyuk-kalin-35-40-2.jpg", "2026/03/altuni-smargat-mazi-3clt.jpg", "2026/03/mugo-cami-2.jpg", "2026/03/bodur-mavi-ladin-2.jpg", "2026/04/bonsai-zeytin-200-litre.jpg", "2026/03/zeytin-70-litre-3.jpg", "2026/03/zeytin-70-litre.jpg", "2026/03/sutun-taflan-5-litre-2.jpg", "2026/03/sus-erigi-yarim-tijli.jpg", "2026/03/surunucu-ardic-sari.jpg", "2026/03/surunucu-ardic-mavi-buyuk.jpg", "2026/03/smargat-mazi-3-litre-2.jpg", "2026/03/smaragd-mazi-pot-3.jpg", "2026/03/skyrocket-10-litre-10.jpg", "2026/03/skyrocket-10-litre-9.jpg", "2026/03/skyrocket-10-litre-5.jpg", "2026/03/loropetalum-top.jpg", "2026/03/piramit-altuni-taflan-3.jpg", "2026/03/piramit-altuni-taflan-2.jpg", "2026/03/piramit-taflan-1-metre-2.jpg", "2026/03/pampas-otu-3litre-4.jpg", "2026/03/firca-calisi-2.jpg", "2026/03/defne-3-litre.jpg", "2026/03/arizona-piral-2.jpg", "2026/03/karayemis-tijli.jpg", "2026/03/karayemis-piramit.jpg", "2026/03/goldrider-150-175cm-4.jpg", "2026/03/goldrider-40-60cm-3-litre.jpg", "2026/03/citir-taflan-yesil-alacali.jpg", "2026/03/leylandi-4-metre-75lt-saksi-2.jpg", "2026/03/250cm-leylandi-35-litre-3.jpg", "2026/03/boylu-alev-10-litre-2.jpg", "2026/03/boylu-alev-5-litre-5.jpg", "2026/03/festuca-mavi-cim-1-litre-4.jpg", "2026/03/defne-laurus-nobilis-25-litre-5.jpg", "2026/03/defne-laurus-nobilis-25-litre.jpg", "2026/04/bodur-alev-5-litre-3.jpg", "2026/03/blue-arrow-100-125cm-2.jpg", "2026/03/blue-arrow-20-30cm.jpg", "2026/04/nar-buyuk.jpg", "2026/03/sus-erigi-2-1.jpg", "2026/03/sus-erigi-1.jpg", "2026/03/sus-erigi-2-1-1.jpg", "2026/03/sus-erigi-1.jpg", "2026/03/oya-agaci-3.jpg", "2026/03/mavi-ladin-5.jpg", "2026/03/mavi-ladin-2.jpg", "2026/03/erguvan-1.jpg", "2026/03/erguvan-2-1.jpg", "2026/03/erguvan-1.jpg", "2026/04/ihlamur-buyuk.jpg", "2026/04/bati-ladini-2.jpg", "2026/03/asili-hoopsi-mavi-ladin-3.jpg", "2026/03/asili-hoopsi-mavi-ladin.jpg", "2026/03/asili-hoopsi-mavi-ladin-4.jpg", "2026/04/sus-elmasi.jpg", "2026/04/sus-elmasi-2.jpg", "2026/03/sus-elmasi-2.jpg", "2026/03/ebee48de-8cb2-43e1-af80-9d48c8811a3c.jpg", "2026/03/ebee48de-8cb2-43e1-af80-9d48c8811a3c.jpg", "2026/03/sus-erigi-2.jpg", "2026/03/sus-kirazi-2.jpg", "2026/03/oya-4.jpg", "2026/03/salkim-sogut.jpg", "2026/03/salkim-sogut.jpg", "2026/03/osmanli-cimi.jpg", "2026/03/kelebek-calisi-2.jpg", "2026/03/gravilla.jpg", "2026/03/gravilla-3.jpg", "2026/03/goknar.jpg", "2026/04/bati-ladini-3.jpg", "2026/03/amerikan-sarmasigi.jpg", "2026/03/akasya.jpg", "2026/03/yaprak-doken-manolya-2.jpg", "2026/03/top-goldrider.jpg", "2026/03/ters-dut-sofora.jpg", "2026/03/tek-top-arizona.jpg", "2026/03/sus-igdesi-alacali.jpg", "2026/03/stricta-ardic-buyuk.jpg", "2026/03/spiral-leylandi.jpg", "2026/03/simsir-top-40-2.jpg", "2026/03/kirmizi-mese.jpg", "2026/03/amerikan-sigla-3.jpg", "2026/03/amerikan-sigla-5.jpg", "2026/03/amerikan-sigla-2.jpg", "2026/03/acer-nagundo-flamingo-2.jpg", "2026/03/acer-nagundo-flamingo-3.jpg", "2026/04/ihlamur.jpg", "2026/04/ihlamur-7.jpg", "2026/04/ihlamur-6.jpg", "2026/04/ihlamur-2.jpg", "2026/03/ponpon-arizona.jpg", "2026/03/oya-cali-buyuk.jpg", "2026/03/mor-salkim-3-metre-uzeri-3.jpg", "2026/03/mavi-ladin-tek-top.jpg", "2026/03/japon-semsiyesi.jpg", "2026/03/kamelya-buyuk.jpg", "2026/03/ilex-sari-3.jpg", "2026/04/cycas-palmiye-10.jpg", "2026/04/cycas-palmiye-8.jpg", "2026/03/cordiline-2.jpg", "2026/03/carex-yesil-15-litre.jpg", "2026/03/buyuk-biberiye.jpg", "2026/03/baston-gul-4.jpg", "2026/03/asili-mavi-ladin-1.jpg", "2026/03/arap-yasemini-4-metre-uzeri.jpg", "2026/03/agapanthus-ince-yaprak-2.jpg", "2026/03/agave-alacali.jpg", "2026/03/agave-mavi-buyuk.jpg", "2026/03/3-metre-uzeri-leylandi-45-litre-3.jpg", "2026/03/gelin-taci-alacali.jpg", "2026/03/boylu-alev-80-100-5.jpg", "2026/03/tilia-ihlamur-3litre.jpg", "2026/03/defne-1-litre.jpg", "2026/03/carex-ince-yaprakli-4.jpg", "2026/03/carex-sari-alacali.jpg", "2026/03/goldrider-350-400cm.jpg", "2026/03/mavi-servi-175-200cm.jpg", "2026/03/porsuk-5-litre-2.jpg", "2026/03/phormium-yesil-alacali-3.jpg", "2026/03/phormium-bronz.jpg", "2026/03/nandina-domestica-seika.jpg", "2026/03/nandina-domestica-gulf-stream-2.jpg", "2026/03/nandina-35-litre.jpg", "2026/03/maria-sari-berberis-10-litre.jpg", "2026/03/mahonia-winter-sun-10-litre-2.jpg", "2026/03/lonicera-1-5-litre-2.jpg", "2026/03/ilex-4.jpg", "2026/03/hanimeli-15litre.jpg", "2026/03/bravo-taflan-10-litre-2.jpg", "2026/03/bodur-ates-dikeni-3-litre-2.jpg", "2026/03/berberis-yayilici-3-litre-2.jpg", "2026/03/rocket-berberis-kirmizi-3-litre.jpg", "2026/03/pittosporum-30-40-2.jpg", "2026/03/bravo-taflan.jpg", "2026/03/piramit-bravo-taflan.jpg", "2026/03/aucuba-60-80cm.jpg", "2026/03/arap-yasemini-bambulu-1-litre.jpg", "2026/03/piramit-porsuk-2.jpg", "2026/03/leylandi-2-metre-2.jpg", "2026/03/buyuk-zeytin-bonzai-3.jpg", "2026/03/cinar-saksili-4.jpg", "2026/03/cinar-saksili-8.jpg", "2026/03/cinar-saksili-5.jpg", "2026/03/pampas.jpg", "2026/03/boylu-bambu.jpg", "2026/03/bodur-ates-dikeni-2.jpg", "2026/03/kartopu-20-30.jpg", "2026/03/bati-ladini-2.jpg", "2026/03/atlas-sediri-2.jpg", "2026/03/asili-mavi-ladin.jpg", "2026/03/agapanthus.jpg", "2026/03/limon-servi-10-litre.jpg", "2026/03/kartopu-5.jpg", "2026/03/surunucu-ardic-yesil-2.jpg", "2026/03/skyrocket-60-80cm.jpg", "2026/03/limon-servi-40-60cm.jpg", "2026/03/leylandi-80-100-3.jpg", "2026/03/top-taflan-5.jpg", "2026/03/blue-arrow-80-100-2.jpg", "2026/03/simsir-20-30cm-3-litre-3.jpg", "2026/03/bodur-alev-20-30cm.jpg", "2026/03/altuni-piramit-mazi-100-125cm.jpg", "2026/03/smargat-mazi-100cm-uzeri-5.jpg", "2026/03/arizona-150-175-cm-3.jpg", "2026/03/sutun-taflan-15-litre.jpg", "2026/03/ponpon-leylandi.jpg", "2026/03/pittosporum-100-120cm-45-litre.jpg", "2026/03/goldrider-80-100cm-5-litre.jpg", "2026/03/3-top-arizona.jpg", "2026/03/3-top-leylandi-1.jpg", "2026/03/spiral-leylandi-ithal-2.jpg", "2026/03/altuni-taflan-7-litre-2.jpg", "2026/03/altuni-taflan-30-40cm-2.jpg", "2026/03/leylandi-13.jpg", "2026/03/pramit-simsir.jpg", "2026/03/zeytin-bodur-mantar-160-litre.jpg", "2026/03/ligustrum-buyuk-saksi-2.jpg", "2026/03/leylandi-175-200.jpg", "2026/03/leylandi-175-200-2.jpg", "2026/03/smargat-mazi-80-100cm-3.jpg", "2026/03/top-taflan-yesil-15litre-30-40cm-cap-2.jpg", "2026/03/surunucu-ardic-1.jpg", "2026/03/skyrocket-200-250cm.jpg", "2026/03/top-simsir-4.jpg", "2026/03/top-simsir-3.jpg", "2026/03/lonicera-duble-40-60cm-15litre.jpg", "2026/03/leylandi-cit-yesil-100-125cm-7.jpg", "2026/03/kathy-taflan-5litre.jpg", "2026/03/top-simsir-2-1.jpg", "2026/03/abelia-sari-alacali-2.jpg", "2026/03/leylandi-12.jpg", "2026/03/arizona-150cm-uzeri.jpg", "2026/03/buyuk-palmiye2.jpg", "2026/03/buyuk-palmiye.jpg", "2026/03/buyuk-palmiye4.jpg", "2026/03/simsir-top-60-80cm.jpg", "2026/03/manolya-yaprak-dokmeyen-2.jpg", "2026/03/limon-servi-2-metre-3.jpg", "2026/03/himalaya-sediri-125-150cm-3.jpg", "2026/03/himalaya-sediri-200-250cm.jpg", "2026/03/bati-ladini-3-5-metre.jpg", "2026/03/goldrider-100-125cm-2-2.jpg", "2026/03/mircam-top-mazi-20-30cm-cap-2.jpg", "2026/03/ligustrum-kurtbagri.jpg", "2026/03/ligustrum-5-litre-60-80cm.jpg", "2026/03/kartopu-viburnum-lucidum-7clt-2.jpg", "2026/03/tijli-sus-erigi-2.jpg", "2026/03/buyuk-palmiye5.jpg", "2026/03/totem-servi-2.jpg", "2026/03/ligustrum-kurtbagri.jpg", "2026/03/piramit-mazi-60-80-3.jpg", "2026/03/yesil-surunucu-ardic-2.jpg", "2026/03/golden-carpet-1.jpg", "2026/03/blue-arrow-2.jpg", "2026/04/stricta-ardic-5-litre.jpg", "2026/03/aucuba-30-40cm-5.jpg", "2026/03/aucuba-30-40cm-3.jpg", "2026/03/simsir-5litre-30-40cm-4.jpg", "2026/03/limon-servi-3-litre.jpg", "2026/03/kartopu-lucidum-60-80cm-8litre-3.jpg", "2026/03/kartopu-tinus-40-60cm-3.jpg", "2026/03/ortanca-3litre.jpg", "2026/03/goldrider-6.jpg", "2026/03/leylandi-60-80cm.jpg", "2026/03/leylandi-30-40cm-2.jpg", "2026/03/leylandi-20-30cm-2.jpg", "2026/03/goldrider-6.jpg", "2026/03/cinar-6.jpg", "2026/03/cinar-6.jpg", "2026/03/cinar-7.jpg", "2026/04/top-defne-45-litre-2-1.jpg", "2026/03/piramit-defne-3.jpg", "2026/03/palmiye.jpg", "2026/03/ponpon-goldrider-2.jpg", "2026/03/sari-yasemin-3-1.jpg", "2026/03/ortanca-20-30cm-boy-3.jpg", "2026/03/boylu-alev-40-60-5.jpg", "2026/03/physocarpus-8litre-2.jpg", "2026/03/zakkum-15litre.jpg", "2026/03/enfidan-oya-agaci-pembe-renkli-1-metre-ve-uzeri-568.jpg", "2026/03/mavi-servi-arizona-2.jpg", "2026/03/sutun-taflan-30-40cm-3.jpg", "2026/03/altuni-taflan-2.jpg", "2026/03/siyah-cim.jpg", "2026/03/boylu-alev-20-30-cm-boy-10-adet-66.jpg", "2026/03/leylandi-20-30-cm-boy-10-lu-64.jpg", "2026/03/carex-30-40-4.jpg", "2026/03/teucrium-fruticans-zeytin-calisi-3-adet-58.jpg", "2026/03/leylak-syringa-meyeri-palibin-521.jpg", "2026/03/altin-canagi-2.jpg", "2026/03/abelia-grandiflora-kaleideskop-sari-alacali-guzellik-calisi-2-adet-33.jpg", "2026/03/gelin-taci-60cm-2.jpg", "2026/03/kartopu-opulus-7litre-80-100cm-2.jpg", "2026/03/arap-yasemini-2metre.jpg", "2026/03/pittospotum-20-30-cm-cap-3-litrelik-saksi-saksi-2-adet-27.jpg", "2026/03/altin-canagi-3.jpg", "2026/03/ortanca-genel-3.jpg", "2026/03/top-simsir-50-60cm2.jpg", "2026/03/sari-aucuba-japon-defnesi-3.jpg", "2026/03/yesil-citir-taflan-5-litre-3-1.jpg", "2026/03/kartopu-lucidum-40-60cm-3lt-saksi-4.jpg", "2026/03/alaca-abelia-2ltlik-saksi-2.jpg", "2026/03/abelia-20-30-cap-2000-2.jpg", "2026/03/euryops-sari-papatya-cicek.jpg", "2026/03/loropetalum.jpg", "2026/03/phormium500adet-7litre-60-80-cmboy5.jpg", "2026/03/lavant-3-litre-2.jpg", "2026/03/bodur-alev-1-5-litre-salsi-20-30cm.jpg", "2026/03/mor-salkim-wisteria-sinensis-sarmasik-20.jpg", "2026/03/bravo-taflan-15-20cm-3.jpg", "2026/03/hedera-helix-2.jpg", "2026/03/carex-30-40-3.jpg", "2026/03/tek-top-leylandi.jpg", "2026/03/yesil-citir-taflan.jpg", "2026/03/thuja-plicata-goldy-golden2.jpg", "2026/03/sutun-taflan-1litre.jpg", "2026/03/sus-igdesi-40-60cm-8litre.jpg", "2026/03/sahte-keci-sakali-60-80cm-4.jpg", "2026/03/palmiye-govde-boyu-70cm.jpg", "2026/03/festuca-mavi-cim-20-30cm-5litre-2.jpg", "2026/03/nandina-buyuk-2.jpg", "2026/03/altuni-taflan-pot-20-30cm-2.jpg", "2026/03/top-simsir.jpg", "2026/03/old-gold-ardic-20-30cm-2.jpg", "2026/03/lavantin-3lt-2.jpg", "2026/03/lavanta-pot-2.jpg", "2026/03/kartopu-opulus-7litre-40-60cm-dolgun-5.jpg", "2026/03/karayemis-60-80cm-3.jpg", "2026/03/gelin-taci-60cm-2.jpg", "2026/03/ates-dikeni1.jpg", "2026/03/blue-arrow-100-120cm-8litre.jpg", "2026/03/bahardali.jpg", "2026/03/aucuba-30-40cm-4.jpg", "2026/03/mor-salkim-7litre4.jpg", "2026/03/altuni-smargat-mazi-60-80.jpg", "2026/03/sarmasik-gul-200cm-2.jpg", "2026/03/osmanli-simsiri-20-30cm-boy-5litre.jpg", "2026/03/meyland-gul-kirmizi-4.jpg", "2026/03/enfidan-boylu-alev-2-adet-30-40cm-573.jpg", "2026/04/altuni-taflan-10-litre.jpg", "2026/03/bahardali.jpg", "2026/03/defne-40-60-3.jpg", "2026/03/altuni-taflan-30-40-cm-5-adet-81.jpg", "2026/03/ilex-40-60cm-8litre-2.jpg", "2026/03/kartopu-viburnum-lucidum-40-50cm-2.jpg", "2026/03/palmiye-100-cm-saksili-2.jpg", "2026/03/boylu-alev-40-60-2.jpg", "2026/04/bodur-alev-15-litre-2.jpg", "2026/03/nandina-20-30cm-1-5litre.jpg", "2026/04/pittosporum-7-litre.jpg", "2026/03/nandina-gulf-stream-20-30cm-boy-cennet-bambusu-328.jpg", "2026/03/citir-taflan-sari.jpg", "2026/03/sunkist-mazi-dolgun-2.jpg", "2026/03/top-mazi-30-40cm-3.jpg", "2026/03/hatmi-cali-formlu-4.jpg", "2026/03/gumus-calisi-convolvulus-cneorum-20-30cm-boy-2-adet-815-1.jpg", "2026/03/firca-calisi-callistemon-leavis-genis-yaprakli-20-30-cap-2-aadet-29.jpg", "2026/03/firca-calisibambulu-80-100cm-4.jpg", "2026/03/fatsia-japonica-aralya-2-litrelik-saksida-670.jpg", "2026/03/top-mazi-15-20cm-2.jpg", "2026/03/biberiye-40-60cm-8-litre-3.jpg", "2026/03/abelia-2.jpg", "2026/03/acem-borusu-campsis-radicans-sarmasik-fidani-125-150-cm-37.jpg", "2026/03/enfidan-acem-borusu-80-100cm-turuncu-renkli-sarmasik-600.jpg", "2026/03/nandina-30-40cm-cap-1-5litre.jpg", "2026/03/ligustrum-kurtbagri.jpg"];
+DATA.forEach((d,i)=>{d.img='https://enfidan.com/wp-content/uploads/'+IMG[i];d.th='foto/'+i+'.webp'});
+const BASE_N=DATA.length;
+function ekListeYukle(){DATA=DATA.slice(0,BASE_N);let ek=[];try{ek=JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){}
+ ek.forEach(e=>DATA.push({...e,i:DATA.length}))}
+ekListeYukle();
+const fTag=d=>`<span class="firma">${d.firma}</span>`;
+const foto=d=>d.th?`<img class="th" src="${d.th}" loading="lazy" alt="" onclick="event.stopPropagation();goster(${d.i})">`:'';
+function goster(i){const d=DATA[i];$('mImg').src=d.th;$('mAd').textContent=d.ad;$('mFiyat').textContent=tl(d.fiyat)+' · '+d.firma;$('mBuyuk').href=d.img;$('modal').classList.remove('hide')}
+const TURLER=['Ağaç','Palmiye','İbreli','Çalı','Sarmaşık','Çim-Saz','Diğer'];
+const $=id=>document.getElementById(id);
+const tl=n=>Math.round(n).toLocaleString('tr-TR')+' TL';
+const yuv=n=>Math.round(n/500)*500;
+let secili=[];
+TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
+
+const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN'];
+try{const s=JSON.parse(localStorage.getItem('peyzajAyar5')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar5',JSON.stringify(s))}catch(e){}}
+const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000};
+function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
+function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
+function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
+function ekle_liste(){const f=$('ekFirma').value.trim();if(!f){$('ekmsg').textContent='Firma adı yaz';return}
+ const ok=[],hata=[];$('ekListe').value.split('\n').map(s=>s.trim()).filter(Boolean).forEach(s=>{const p=s.split(/[;\t]/).map(x=>x.trim());const fy=parseFloat((p[1]||'').replace(/\./g,'').replace(',','.'));
+  if(!p[0]||!fy){hata.push(s);return}const t=TURLER.find(t=>norm(t)===norm(p[2]||''))||'Diğer';
+  const bo=(p[0].match(/(\d+)\s*-\s*(\d+)\s*cm/i)||[]),q=(p[0].match(/(\d+)\s*-\s*(\d+)\s*Q/i)||[]);
+  ok.push({ad:p[0],fiyat:fy,tur:t,boy:bo[1]?bo[1]+'-'+bo[2]:'',cap:q[1]?q[1]+'-'+q[2]:'',lt:'',stok:true,firma:f,ilet:$('ekIlet').value.trim()})});
+ secili=secili.filter(s=>s.i<BASE_N);ekKaydet(ekOku().filter(e=>e.firma!==f).concat(ok));ekListeYukle();ilet();ekOzet();
+ $('ekmsg').textContent=`${ok.length} bitki eklendi`+(hata.length?`, ${hata.length} satır okunamadı`:'');ara();hesap()}
+function firmaSil(){const f=$('ekFirma').value.trim();if(!f||f==='enfidan.com'){$('ekmsg').textContent='Silinecek firma adını yaz';return}
+ secili=secili.filter(s=>s.i<BASE_N);ekKaydet(ekOku().filter(e=>e.firma!==f));ekListeYukle();ekOzet();$('ekmsg').textContent=f+' silindi';ara();hesap()}
+function ilet(){DATA.forEach(d=>{if(d.ilet)FIRMALAR[d.firma]=d.ilet})}
+function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
+function v(id){return parseFloat($(id).value)||0}
+function tab(n){[1,2,3].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});if(n===2)katalog()}
+function norm(s){return s.toLocaleLowerCase('tr-TR')}
+function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
+ if(!q&&!t){r.classList.add('hide');return}
+ const L=DATA.filter(d=>(!t||d.tur===t)&&(!q||q.split(/\s+/).every(w=>norm(d.ad).includes(w)))).sort((a,b)=>b.stok-a.stok||a.fiyat-b.fiyat).slice(0,60);
+ r.innerHTML=L.length?L.map(d=>`<div class="${d.stok?'':'out'}" onclick="ekle(${d.i})"><span>${foto(d)}<span style="flex:1;min-width:0">${d.ad}<span class="tag">${d.tur}</span>${fTag(d)}${d.stok?'':' <span class="tag">tükendi</span>'}</span></span><b>${tl(d.fiyat)}</b></div>`).join(''):'<div>Sonuç yok</div>';
+ r.classList.remove('hide')}
+function agacMi(d){if(d.tur==='Ağaç'||d.tur==='Palmiye')return true;if(d.tur!=='İbreli')return false;
+ const b=parseInt(d.boy)||0,l=parseFloat(d.lt)||0;return b>=150||l>=25||/metre/i.test(d.ad)}
+function ekle(i){const x=secili.find(s=>s.i===i);if(x)x.adet++;else secili.push({i,adet:1,agac:agacMi(DATA[i])});hesap()}
+function tip(i){const x=secili.find(s=>s.i===i);if(x)x.agac=!x.agac;hesap()}
+function sil(i){secili=secili.filter(s=>s.i!==i);hesap()}
+function adet(i,val){const x=secili.find(s=>s.i===i);if(x)x.adet=Math.max(1,parseInt(val)||1);hesap(false)}
+function hesap(seciliCiz=true){kaydet();
+ const alan=v('alan'),kal=v('kal'),pay=1+v('fPay')/100;
+ const m3=alan*kal/100;
+ const kal_=[];
+ const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3/tk),kalan=m3-tir*tk,kucuk=0;
+ if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
+ const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
+ kal_.push(['Toprak dolgusu ('+(Math.round(m3*10)/10)+' m³ × '+tl(v('fTop'))+(nTxt?' + '+nTxt+' nakliye':'')+')',m3*v('fTop')+tir*v('fTN')+kucuk*v('fKN')]);
+ if($('cCim').checked)kal_.push(['Çim uygulaması ('+alan+' m² × '+tl(v('fCim'))+')',alan*v('fCim')]);
+ if($('cSul').checked)kal_.push(['Otomatik sulama sistemi ('+alan+' m² × '+tl(v('fSul'))+')',alan*v('fSul')]);
+ const ag=secili.map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac}));
+ const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('fBN'):0;
+ ag.forEach(d=>kal_.push([d.ad+' × '+d.adet,d.adet*(d.fiyat*pay+(d.agac?v('fDA'):v('fDC')))+(bAlis?bN*d.fiyat*d.adet/bAlis:0),d.firma]));
+ const top=kal_.reduce((a,k)=>a+k[1],0);
+ const agSay=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0);
+ const lim=Math.floor(alan/(v('fLim')||10));
+ $('agWarn').textContent=agSay>lim?`Uyarı: ${alan} m² için en fazla ${lim} ağaç önerilir, şu an ${agSay}.`:(lim?`Ağaç: ${agSay} / en fazla ${lim}`:'');
+ const tukendi=ag.filter(d=>!d.stok);
+ const sus=AYAR.filter(k=>k!=='fLim'&&VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
+ if(seciliCiz)$('sel').innerHTML=ag.length?'<table>'+ag.map(d=>`<tr><td>${foto(d)}${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç ('+tl(v('fDA'))+')':'çalı ('+tl(v('fDC'))+')'}</a></div></td><td style="width:70px"><input type="number" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"></td><td style="width:40px"><button class="btn del" onclick="sil(${d.i})">✕</button></td></tr>`).join('')+'</table>':'<p class="mut">Henüz bitki seçilmedi.</p>';
+ $('ozet').innerHTML=kal_.map(k=>`<tr><td>${k[0]}${k[2]?`<span class="firma">${k[2]}</span>`:''}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+`<tr class="tot"><td>Toplam (KDV hariç)</td><td class="n">${tl(kal_.reduce((a,k)=>a+yuv(k[1]),0))}</td></tr>`+(sus.length?`<tr><td colspan="2" class="warn">Ayarlarda olağan dışı birim fiyat var: ${sus.join(', ')}. Ayarlar sekmesini kontrol et.</td></tr>`:'')+(tukendi.length?`<tr><td colspan="2" class="warn">Sitede tükenmiş: ${tukendi.map(d=>d.ad).join(', ')}</td></tr>`:'');
+ const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);
+ const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
+ $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} adet (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
+ $('wa').value=`Merhaba, konsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\nKesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`}
+function kopya(id){const t=$(id).value;const m=$(id==='wa'?'kmsg':'cmsg')||{};
+ (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>m.textContent='Kopyalandı').catch(()=>{$(id).select();m.textContent='Metni seçtim, elle kopyalayın'})}
+function katalog(){const q=norm($('kq').value.trim()),t=$('kt').value,s=$('kst').checked;
+ const L=DATA.filter(d=>(!t||d.tur===t)&&(!s||d.stok)&&(!q||q.split(/\s+/).every(w=>norm(d.ad).includes(w))));
+ $('kcount').textContent=L.length+' ürün';
+ $('ktab').innerHTML='<tr><th>Bitki</th><th>Tür</th><th>Boy cm</th><th>Çap Q</th><th>Saksı L</th><th class="n">Fiyat</th><th>Firma</th></tr>'+L.map(d=>`<tr class="${d.stok?'':'out'}" style="${d.stok?'':'opacity:.5'}"><td>${foto(d)}${d.ad}</td><td>${d.tur}</td><td>${d.boy}</td><td>${d.cap}</td><td>${d.lt}</td><td class="n">${tl(d.fiyat)}</td><td class="firma">${d.firma}</td></tr>`).join('')}
+let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csvTA.id='csvta';csvTA.style.cssText='margin-top:8px;min-height:120px';$('cmsg').after(csvTA)}
+ csvTA.value='Bitki;Tür;Boy cm;Çap Q;Saksı L;Fiyat TL;Stokta;Firma\n'+DATA.map(d=>[d.ad,d.tur,d.boy,d.cap,d.lt,d.fiyat,d.stok?'Evet':'Hayır',d.firma].join(';')).join('\n');kopya('csvta')}
+['alan','kal','cCim','cSul',...AYAR].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+['cCim','cSul'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
+$('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
+['kq','kt','kst'].forEach(id=>$(id).addEventListener('input',katalog));$('kst').addEventListener('change',katalog);
+ilet();ekOzet();ara();hesap();
+</script>
+</body>
+</html>
