@@ -126,6 +126,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
    <div><label>Instagram</label><input id="mIg" value="@bahcemmpeyzaj"></div>
    <div><label>Teklif geçerliliği (gün)</label><input id="mGun" type="number" inputmode="numeric" value="15"></div>
   </div>
+  <label class="sw" style="margin-top:10px">WhatsApp linki ekle (önizlemede profil fotoğrafın görünür) <input type="checkbox" id="mWa" class="tgl"></label>
   <div style="margin-top:10px"><label>Ödeme şekli</label><input id="mOde" value="%40 başlangıçta, %60 iş bitiminde"></div>
  </div>
  <div class="card"><h2>⚙️ Birim fiyatlar</h2>
@@ -652,6 +653,8 @@ TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('optio
 
 const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde'];
+try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
+$('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
@@ -717,7 +720,7 @@ function hesap(seciliCiz=true){kaydet();
  const selam='Merhaba'+(mus?' '+mus:'')+','+(fir||ad?' ben '+[fir,ad].filter(Boolean).join("'dan ")+'.':'');
  let dg=tel.replace(/\D/g,'');if(dg.startsWith('0'))dg='90'+dg.slice(1);if(dg.length===10)dg='90'+dg;
  const telG=dg.length===12?`+${dg.slice(0,2)} ${dg.slice(2,5)} ${dg.slice(5,8)} ${dg.slice(8,10)} ${dg.slice(10)}`:tel;
- const wa=dg.length===12?'wa.me/'+dg:'';
+ const wa=(dg.length===12&&$('mWa').checked)?'wa.me/'+dg:'';
  const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
  $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kal_.map(k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`).join('\n')+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
