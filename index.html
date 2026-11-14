@@ -123,7 +123,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
    <div><label>Instagram</label><input id="mIg" value="@bahcemmpeyzaj"></div>
    <div><label>Teklif geçerliliği (gün)</label><input id="mGun" type="number" inputmode="numeric" value="15"></div>
   </div>
-  <div style="margin-top:10px"><label>Ödeme şekli</label><input id="mOde" value="%50 başlangıçta, %50 teslimde"></div>
+  <div style="margin-top:10px"><label>Ödeme şekli</label><input id="mOde" value="%40 başlangıçta, %60 iş bitiminde"></div>
  </div>
  <div class="card"><h2>⚙️ Birim fiyatlar</h2>
   <div class="grid">
@@ -650,7 +650,7 @@ TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('optio
 const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde'];
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
-try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
 const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
