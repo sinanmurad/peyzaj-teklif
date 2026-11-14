@@ -122,9 +122,12 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <p class="mut" id="kNot" style="margin-bottom:0"></p></div>
  <div class="card"><h2>🎯 Kâr hedefi</h2>
   <label class="sw">Bu işe özel kâr oranı uygula <input type="checkbox" id="kOn" class="tgl"></label>
-  <div id="kBox"><div style="display:flex;gap:10px;align-items:center;margin-top:6px"><input type="range" id="kRng" min="0" max="200" step="5" value="30" style="flex:1;accent-color:var(--acc)"><input id="kOran" type="number" inputmode="decimal" value="30" style="width:80px"><b>%</b></div>
+  <div id="kBox"><div style="font-weight:700;margin-top:8px">🌳 Bitkiler (ağaç, çalı)</div><div style="display:flex;gap:10px;align-items:center;margin-top:6px"><input type="range" id="kRng" min="0" max="200" step="5" value="30" style="flex:1;accent-color:var(--acc)"><input id="kOran" type="number" inputmode="decimal" value="30" style="width:80px"><b>%</b></div>
    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sec" style="flex:1" onclick="kSet(20)">%20</button><button class="btn sec" style="flex:1" onclick="kSet(30)">%30</button><button class="btn sec" style="flex:1" onclick="kSet(50)">%50</button><button class="btn sec" style="flex:1" onclick="kSet(100)">%100</button></div>
-   <p class="mut" style="margin-bottom:0">Açıkken teklifteki her kalem <b>maliyet × (1 + oran)</b> olarak yeniden fiyatlanır, teklif ve WhatsApp metni otomatik güncellenir. Kapalıyken standart fiyatlar (çim 190 vb.) geçerli.</p></div></div>
+   <div style="font-weight:700;margin-top:16px">🧱 Toprak · çim · sulama</div>
+   <label class="sw">Standart fiyatta kalsın (çim 190 vb.) <input type="checkbox" id="kStd" class="tgl" checked></label>
+   <div id="kBox2" style="display:flex;gap:10px;align-items:center"><span class="mut" style="flex:1">Bu kalemlere kâr oranı</span><input id="kOran2" type="number" inputmode="decimal" value="30" style="width:80px"><b>%</b></div>
+   <p class="mut" style="margin-bottom:0">Açıkken kalemler <b>maliyet × (1 + oran)</b> olarak yeniden fiyatlanır, teklif ve WhatsApp metni otomatik güncellenir. İşçi ve diğer giderler kalemlere maliyet oranında dağıtılır.</p></div></div>
  <div class="card"><h2>👷 Bu işin giderleri</h2>
   <div class="grid">
    <div><label>İşçi sayısı</label><input id="kIsci" type="number" inputmode="numeric" value="0"></div>
@@ -722,7 +725,7 @@ function hesap(seciliCiz=true){kaydet();
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3/tk),kalan=m3-tir*tk,kucuk=0;
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
  const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
- const K=$('kOn').checked,kO=v('kOran')/100,nak=tir*v('fTN')+kucuk*v('fKN'),r1=x=>Math.round(x*10)/10;
+ const KB=$('kOn').checked,K=KB&&!$('kStd').checked,kO=v('kOran')/100,kO2=v('kOran2')/100,nak=tir*v('fTN')+kucuk*v('fKN'),r1=x=>Math.round(x*10)/10;
  kal_.push([K?'Toprak dolgusu ('+r1(m3)+' m³'+(nTxt?', nakliye dahil':'')+')':'Toprak dolgusu ('+r1(m3)+' m³ × '+tl(v('fTop'))+(nTxt?' + '+nTxt+' nakliye':'')+')',m3*v('fTop')+nak,undefined,m3*v('gTop')+nak]);
  const ck=+$('cimK').value,cs=CIM[ck];let cimSat=null;
  if($('cCim').checked){kal_.push([K?'Çim uygulaması ('+alan+' m²)':'Çim uygulaması ('+alan+' m² × '+tl(v('fCim'))+')',alan*v('fCim'),cs?cs.firma:undefined,alan*(cs?cs.fiyat:v('gCim'))]);if(cs)cimSat=cs}
@@ -732,7 +735,8 @@ function hesap(seciliCiz=true){kaydet();
  ag.forEach(d=>{const pn=bAlis?bN*d.fiyat*d.adet/bAlis:0;kal_.push([d.ad+' × '+d.adet,d.adet*(d.fiyat*pay+(d.agac?v('fDA'):v('fDC')))+pn,d.firma,d.adet*d.fiyat+pn])});
  const isG=v('kIsci')*v('kGun')*v('kYev')+v('kDig'),malK=kal_.reduce((a,k)=>a+k[3],0),malT=malK+isG;
  const stdT=kal_.reduce((a,k)=>a+yuv(k[1]),0);
- if(K&&malK>0)kal_.forEach(k=>{k[1]=(k[3]+isG*k[3]/malK)*(1+kO)});
+ const nS=kal_.length-ag.length;
+ if(KB&&malK>0)kal_.forEach((k,i)=>{const b=i>=nS;if(b||K)k[1]=(k[3]+isG*k[3]/malK)*(1+(b?kO:kO2))});
  const top=kal_.reduce((a,k)=>a+k[1],0);
  const agSay=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0);
  const lim=Math.floor(alan/(v('fLim')||10));
@@ -741,7 +745,7 @@ function hesap(seciliCiz=true){kaydet();
  const sus=AYAR.filter(k=>k!=='fLim'&&VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
  if(seciliCiz)$('sel').innerHTML=ag.length?ag.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a></div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
  $('ozet').innerHTML=kal_.map(k=>`<tr><td>${k[0]}${k[2]?`<span class="firma">${k[2]}</span>`:''}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+`<tr class="tot"><td>Toplam (KDV hariç)</td><td class="n">${tl(kal_.reduce((a,k)=>a+yuv(k[1]),0))}</td></tr>`+(sus.length?`<tr><td colspan="2" class="warn">Ayarlarda olağan dışı birim fiyat var: ${sus.join(', ')}. Ayarlar sekmesini kontrol et.</td></tr>`:'')+(tukendi.length?`<tr><td colspan="2" class="warn">Sitede tükenmiş: ${tukendi.map(d=>d.ad).join(', ')}</td></tr>`:'');
- const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);karCiz(kal_,toplam,malT,isG,stdT,K);$('cimBox').classList.toggle('hide',!$('cCim').checked);
+ const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);karCiz(kal_,toplam,malT,isG,stdT,KB);$('cimBox').classList.toggle('hide',!$('cCim').checked);
  const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
  if(cimSat)(grp[cimSat.firma]=grp[cimSat.firma]||[]).push({ad:cimSat.ad+' (m²)',adet:alan,fiyat:cimSat.fiyat});
  $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} ${/\(m²\)$/.test(d.ad)?'m²':'adet'} (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
@@ -757,7 +761,7 @@ function karCiz(L,top,mal,isG,std,K){const kar=top-mal,y=mal?kar/mal*100:0,c=kar
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
  const sK=std-mal;$('kNot').textContent=(K?`Standart fiyatlarla olsaydı: ${tl(std)} → kâr ${tl(Math.round(sK))}${mal?' ('+f(sK/mal*100)+')':''}. `:'')+(top?`Satış üzerinden marj: ${f(kar/top*100)}.`:'')+(isG?'':' İşçi gideri girilmedi, kâra kendi emeğin de dahil.');
- $('kBox').style.opacity=K?1:.45;
+ $('kBox').style.opacity=K?1:.45;$('kBox2').style.opacity=$('kStd').checked?.4:1;
  $('kTab').innerHTML='<tr><th>Kalem</th><th class="n">Maliyet</th><th class="n">Teklif</th></tr>'+L.map(k=>`<tr><td>${k[0].replace(/ \(.*$/,'').slice(0,40)}</td><td class="n">${tl(Math.round(k[3]))}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+(isG?`<tr><td>İşçi + diğer</td><td class="n">${tl(Math.round(isG))}</td><td class="n">–</td></tr>`:'')+`<tr class="tot"><td>Toplam</td><td class="n">${tl(Math.round(mal))}</td><td class="n">${tl(top)}</td></tr>`}
 function kSet(x){$('kOran').value=x;$('kRng').value=Math.min(200,x);$('kOn').checked=true;hesap()}
 function igKopya(){const t=$('wa').value.replace(/\*/g,'');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Kopyalandı, Instagram DM\'e yapıştır')).catch(()=>{$('wa').select();toast('Metni seçtim, elle kopyala')})}
@@ -772,9 +776,10 @@ let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csv
 ['alan','kal','cCim','cSul','musteri',...AYAR,...METIN].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.ad+' – '+c.fiyat+' TL/m²';$('cimK').appendChild(o)});
 $('cimK').addEventListener('change',()=>hesap());
-['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
+['cCim','cSul','kOn','kStd'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
 ['kIsci','kGun','kDig'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 $('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;$('kOn').checked=true;hesap()});
+$('kOran2').addEventListener('input',()=>hesap());
 $('kOran').addEventListener('input',()=>{$('kRng').value=Math.min(200,v('kOran'));hesap()});
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
 ['kq','kt','kst'].forEach(id=>$(id).addEventListener('input',katalog));$('kst').addEventListener('change',katalog);
