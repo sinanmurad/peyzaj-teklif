@@ -121,6 +121,14 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <label class="sw" style="border-top:0;padding-top:0">Gruplu teklif (birim fiyat görünmez) <input type="checkbox" id="mGrup" class="tgl"></label><textarea id="wa"></textarea>
   <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div>
   <button class="btn full" style="margin-top:8px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="igKopya()">Instagram DM için kopyala</button> <span id="kmsg" class="mut"></span></div></div>
+ <div class="card"><h2>💾 Teklifi kaydet</h2><p class="mut" style="margin-top:-6px">Müşteri portföyüne eklenir, sonra Kayıtlar'dan açıp durumunu takip edersin. Sadece sen görürsün.</p>
+  <div class="grid">
+   <div><label>Müşteri telefonu</label><input id="kmTel" type="tel" placeholder="05xx…"></div>
+   <div><label>İlçe / semt</label><input id="kmIlce" placeholder="Zekeriyaköy"></div>
+   <div><label>Nereden geldi?</label><select id="kmKaynak"><option>Instagram</option><option>Site</option><option>Tavsiye</option><option>Diğer</option></select></div>
+   <div><label>Durum</label><select id="kmDurum"><option value="gonderildi">Gönderildi</option><option value="taslak">Taslak</option><option value="kabul">Kabul</option></select></div>
+  </div>
+  <button class="btn full" style="margin-top:10px" onclick="teklifKaydet()">💾 Kaydet</button> <span id="kmMsg" class="mut"></span></div>
  <div class="card"><h2>📦 Tedarikçi sipariş listesi</h2><p class="mut" style="margin-top:-6px">Sadece sende kalır. Müşteri onaylayınca firmaya gönder.</p><textarea id="sip" style="min-height:140px"></textarea>
   <div style="margin-top:10px"><button class="btn sec full" onclick="kopya('sip')">Listeyi kopyala</button></div></div>
 </section>
@@ -166,6 +174,17 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   </div>
   <p class="mut" style="margin-bottom:0"><b>Toprak fire:</b> serilen toprak sıkışır, ölçtüğünden fazla almak gerekir.<br><b>Çim fire:</b> kenar ve köşe kesimlerinde rulo artar.<br><b>Genel gider:</b> araç, alet aşınması, telefon, reklam gibi tek bir işe yazılmayan masraflar. Ayda bunlara ne harcıyorsan, aylık cirona böl: çıkan yüzde bu sayıdır.</p></div>
 </section>
+<section id="p6" class="hide">
+ <div id="girisKart" class="card hide"><h2>🔐 Giriş</h2><p class="mut" style="margin-top:-6px">Bahçem admin panelindeki e-posta ve şifren. Bir kere girersin, telefon hatırlar.</p>
+  <label>E-posta</label><input id="gEposta" type="email" value="sinanmurat34@gmail.com" autocomplete="username">
+  <label style="margin-top:8px">Şifre</label><input id="gSifre" type="password" autocomplete="current-password">
+  <button class="btn full" style="margin-top:10px" onclick="girisYap()">Giriş yap</button> <span id="gMsg" class="mut"></span></div>
+ <div id="kayitAlan" class="hide">
+  <div class="card"><h2>📊 Rehber</h2><div class="grid kpi" id="rKpi"></div><div id="rBitki" class="mut" style="margin-top:10px;line-height:1.6"></div></div>
+  <div class="card"><h2>📁 Teklifler</h2><input id="kAra" type="search" placeholder="Ara: isim, telefon, semt…" style="margin-bottom:8px"><div id="kListe"></div>
+   <p class="mut" style="margin-bottom:0"><a href="#" onclick="cikisYap();return false" style="color:var(--mut)">Çıkış yap</a></p></div>
+ </div>
+</section>
 <section id="p3" class="hide">
  <div class="card"><h2>🏷️ Firma bilgilerin</h2>
   <p class="mut" style="margin-top:-6px">Her WhatsApp teklifine otomatik eklenir.</p>
@@ -181,7 +200,6 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <div style="margin-top:10px"><label>Dahil olmayanlar (sonradan "bu da dahil sanmıştım" demesinler)</label><input id="mHaric" value="Moloz atımı, eski bitki/çim sökümü, elektrik ve su bağlantısı"></div>
   <div style="margin-top:10px"><label>Bakım notu (bitki kurursa sorumluluk netleşsin)</label><input id="mBakim" value="Teslimden sonra sulama ve bakım müşteriye aittir."></div>
   <p class="mut" style="margin-bottom:0">Boş bırakırsan teklifte görünmez.</p>
-  <div style="margin-top:10px"><label>AI anahtarı (görselden bitki saymak için, bir kere gir)</label><input id="mAiKey" type="password" autocomplete="off" placeholder="Sana verdiğim anahtar"></div>
  </div>
  <div class="card"><h2>🌱 Dikim sıklığı</h2><p class="mut" style="margin-top:-6px">"Kaç bitki gerekir?" hesabı bu sayıları kullanır. Kendi alışkanlığına göre değiştir.</p>
   <div class="grid">
@@ -235,10 +253,12 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <button id="t5" onclick="tab(5)"><span class="ic">💰</span>Kâr</button>
  <button id="t4" onclick="tab(4)"><span class="ic">💬</span>Gönder</button>
  <button id="t2" onclick="tab(2)"><span class="ic">🌿</span>Katalog</button>
+ <button id="t6" onclick="tab(6)"><span class="ic">📁</span>Kayıtlar</button>
  <button id="t3" onclick="tab(3)"><span class="ic">⚙️</span>Ayarlar</button>
 </nav>
 <div id="toast"></div>
 <div id="modal" class="hide" onclick="this.classList.add('hide')"><div class="box" onclick="event.stopPropagation()"><div class="grab"></div><img id="mImg" alt=""><div class="cap"><b id="mAd" style="font-size:17px"></b><div class="mut" id="mFiyat" style="margin-top:4px"></div><div class="grid" style="margin-top:12px"><button class="btn" id="mEkle">＋ Teklife ekle</button><a id="mBuyuk" class="btn sec" target="_blank" rel="noopener" style="text-decoration:none">Sitede aç</a></div></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 const RAW=`Gold Rider Leylandi 200 cm Üzeri – 25 Litre Saksı|2000|İbreli|||25|1
 Çınar Ağacı 25-30 Q – 45 Litre Saksı|8000|Ağaç||25-30|45|1
@@ -739,9 +759,9 @@ function firmaSil(){const f=$('ekFirma').value.trim();if(!f||f==='enfidan.com'){
 function ilet(){DATA.forEach(d=>{if(d.ilet)FIRMALAR[d.firma]=d.ilet})}
 function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
-function tab(n){[1,2,3,4,5].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr'}[n];window.scrollTo(0,0);if(n===2)katalog()}
+function tab(n){[1,2,3,4,5,6].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr',6:'Kayıtlar'}[n];window.scrollTo(0,0);if(n===2)katalog();if(n===6)kayitYukle()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('aiMetin').value='';aiSat=[];aiCiz();$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('aiMetin').value='';aiSat=[];aiCiz();curId=null;['kmTel','kmIlce','musteri'].forEach(k=>$(k).value='');$('kmDurum').value='gonderildi';$('kmMsg').textContent='';$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -783,7 +803,7 @@ function hesap(seciliCiz=true){kaydet();
  const sus=AYAR.filter(k=>k!=='fLim'&&VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
  if(seciliCiz)$('sel').innerHTML=ag.length?ag.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a></div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
  $('ozet').innerHTML=kal_.map(k=>`<tr><td>${k[0]}${k[2]?`<span class="firma">${k[2]}</span>`:''}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+`<tr class="tot"><td>Toplam (KDV hariç)</td><td class="n">${tl(kal_.reduce((a,k)=>a+yuv(k[1]),0))}</td></tr>`+(sus.length?`<tr><td colspan="2" class="warn">Ayarlarda olağan dışı birim fiyat var: ${sus.join(', ')}. Ayarlar sekmesini kontrol et.</td></tr>`:'')+(tukendi.length?`<tr><td colspan="2" class="warn">Sitede tükenmiş: ${tukendi.map(d=>d.ad).join(', ')}</td></tr>`:'');
- const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);karCiz(kal_,toplam,malT,isG,stdT,K,gen);$('cimBox').classList.toggle('hide',!$('cCim').checked);
+ const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);karCiz(kal_,toplam,malT,isG,stdT,K,gen);SON={kal:kal_.map(k=>[k[0],yuv(k[1]),Math.round(k[3]),k[2]||null]),toplam,mal:Math.round(malT),isG:Math.round(isG),K};$('cimBox').classList.toggle('hide',!$('cCim').checked);
  const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
  if(cimSat)(grp[cimSat.firma]=grp[cimSat.firma]||[]).push({ad:cimSat.ad+' (m²)',adet:Math.ceil(alanC),fiyat:cimSat.fiyat});
  $('sip').value=Object.keys(grp).length?Object.entries(grp).map(([f,L])=>`${f.toLocaleUpperCase('tr-TR')}${FIRMALAR[f]?' ('+FIRMALAR[f]+')':''}\n`+L.map(d=>`- ${d.ad} × ${d.adet} ${/\(m²\)$/.test(d.ad)?'m²':'adet'} (birim ${tl(d.fiyat)})`).join('\n')+`\nAlış toplamı: ${tl(L.reduce((a,d)=>a+d.fiyat*d.adet,0))}`).join('\n\n'):'Henüz bitki seçilmedi.';
@@ -801,18 +821,62 @@ function aiAday(ad,tur){const ag=/ağaç|palmiye/.test(tur||'')||/ağac/.test(no
  const kok=w=>w.replace(/(ları|leri|lar|ler|ı|i|u|ü)$/,'');const K=ks.map(w=>w.length>5?kok(w):w);
  return DATA.map(d=>{const n=norm(d.ad);return{d,s:K.filter(k=>n.includes(k)).length}}).filter(x=>x.s>0).map(x=>({...x,t:agacMi(x.d)===ag?1:0})).sort((a,b)=>b.t-a.t||b.d.stok-a.d.stok||b.s-a.s||a.d.fiyat-b.d.fiyat).slice(0,10).map(x=>x.d)}
 const BP_URL='https://iyxygdinqnhzucltdjfr.supabase.co',BP_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eHlnZGlucW5oenVjbHRkamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0ODAyNzksImV4cCI6MjEwMDA1NjI3OX0.LPZeE3G_tPdUm53Lr0GB9KIBtSc1wvs-d2TYrHW0VFA';
-try{$('mAiKey').value=localStorage.getItem('peyzajAiKey')||''}catch(e){}
-$('mAiKey').addEventListener('input',()=>{try{localStorage.setItem('peyzajAiKey',$('mAiKey').value.trim())}catch(e){}});
 function gorselKucult(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const m=1280,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.85).split(',')[1])};im.onerror=()=>no(new Error('Görsel açılamadı'));im.src=u})}
-async function aiFotoSay(f){const key=$('mAiKey').value.trim();if(!key){toast('Önce Ayarlar\'a AI anahtarını gir');tab(3);$('mAiKey').focus();return}
+async function aiFotoSay(f){const tok=await oturumTok();if(!tok){toast('Önce Kayıtlar sekmesinden giriş yap');tab(6);return}
  $('aiDurum').textContent='⏳ AI görseli inceliyor (10-20 sn)…';
- try{const g=await gorselKucult(f);const r=await fetch(BP_URL+'/functions/v1/bitki-say',{method:'POST',headers:{'Content-Type':'application/json',apikey:BP_ANON,Authorization:'Bearer '+BP_ANON,'x-teklif-anahtar':key},body:JSON.stringify({gorsel:g,mime:'image/jpeg',not:v('alan')?'Bahçe yaklaşık '+v('alan')+' m²':''})});
-  const j=await r.json().catch(()=>({}));if(!r.ok||!j.basarili)throw new Error(r.status===401?'AI anahtarı hatalı':(j.error||'HTTP '+r.status));
+ try{const g=await gorselKucult(f);const r=await fetch(BP_URL+'/functions/v1/bitki-say',{method:'POST',headers:{'Content-Type':'application/json',apikey:BP_ANON,Authorization:'Bearer '+tok},body:JSON.stringify({gorsel:g,mime:'image/jpeg',not:v('alan')?'Bahçe yaklaşık '+v('alan')+' m²':''})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.basarili)throw new Error(r.status===401?'Giriş gerekli, Kayıtlar sekmesinden giriş yap':(j.error||'HTTP '+r.status));
   aiSat=j.bitkiler.map(b=>({ad:b.ad+(b.tur?' ('+b.tur+')':''),adet:b.adet,aday:aiAday(b.ad,b.tur),sec:0}));
   $('aiMetin').value=j.bitkiler.map(b=>'~'+b.adet+' '+b.ad).join(', ')+(j.diger&&j.diger.length?', '+j.diger.join(', '):'');
   aiCiz();$('aiDurum').textContent='✅ '+j.bitkiler.length+' bitki grubu bulundu'+(j.diger&&j.diger.length?' · diğer: '+j.diger.join(', '):'')+'. Adetler tahmini, üstteki alan hesabıyla karşılaştır.'}
  catch(e){$('aiDurum').textContent='⚠️ '+e.message}}
 $('aiFoto').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)aiFotoSay(f)});
+let SON=null,curId=null,KAYIT=[];
+const sbc=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(BP_URL,BP_ANON,{auth:{persistSession:true,storageKey:'peyzajOturum'}}):null;
+async function oturumTok(){if(!sbc)return null;try{const {data}=await sbc.auth.getSession();return data.session?data.session.access_token:null}catch(e){return null}}
+async function girisYap(){if(!sbc){$('gMsg').textContent='İnternet yok';return}$('gMsg').textContent='…';const {error}=await sbc.auth.signInWithPassword({email:$('gEposta').value.trim(),password:$('gSifre').value});$('gSifre').value='';if(error){$('gMsg').textContent='Giriş olmadı: '+error.message;return}$('gMsg').textContent='';toast('Giriş yapıldı');kayitYukle()}
+async function cikisYap(){if(sbc)await sbc.auth.signOut();kayitYukle()}
+const telNorm=t=>{let d=String(t||'').replace(/\D/g,'');if(d.startsWith('90'))d=d.slice(2);if(d.startsWith('0'))d=d.slice(1);return d};
+async function teklifKaydet(){const tok=await oturumTok();if(!tok){toast('Önce Kayıtlar sekmesinden giriş yap');tab(6);return}
+ const ad=$('musteri').value.trim();if(!ad){$('kmMsg').textContent='Müşteri adını yaz (yukarıda)';$('musteri').focus();return}
+ if(!SON||!SON.toplam){$('kmMsg').textContent='Teklif boş';return}
+ $('kmMsg').textContent='Kaydediliyor…';
+ try{const tel=telNorm($('kmTel').value);let mid=null;
+  if(tel){const r=await sbc.from('tk_musteriler').select('id').eq('telefon',tel).maybeSingle();if(r.error)throw r.error;mid=r.data&&r.data.id}
+  const mus={ad,telefon:tel||null,ilce:$('kmIlce').value.trim()||null,kaynak:$('kmKaynak').value};
+  if(mid){const r=await sbc.from('tk_musteriler').update(mus).eq('id',mid);if(r.error)throw r.error}
+  else{const r=await sbc.from('tk_musteriler').insert(mus).select('id').single();if(r.error)throw r.error;mid=r.data.id}
+  const ag=secili.map(s=>({ad:DATA[s.i].ad,firma:DATA[s.i].firma,adet:s.adet,agac:s.agac,alis:DATA[s.i].fiyat}));
+  const dv={};['alan','kal','kOran','kIsci','kGun','kYev','kDig','zCit','zCal','zBod','zCic'].forEach(k=>dv[k]=$(k).value);['cCim','cSul','kOn','mGrup'].forEach(k=>dv[k]=$(k).checked);
+  const t={musteri_id:mid,durum:$('kmDurum').value,alan:v('alan'),toprak_cm:v('kal'),cim:$('cCim').checked,sulama:$('cSul').checked,kar_orani:SON.K?v('kOran'):null,toplam:SON.toplam,maliyet:SON.mal,kar:SON.toplam-SON.mal,isci_gider:SON.isG,kalemler:SON.kal,bitkiler:ag,durum_verisi:dv,wa_metni:$('wa').value};
+  const r=curId?await sbc.from('tk_teklifler').update(t).eq('id',curId).select('id').single():await sbc.from('tk_teklifler').insert(t).select('id').single();if(r.error)throw r.error;
+  const yeniMi=!curId;curId=r.data.id;$('kmMsg').textContent=yeniMi?'✅ Kaydedildi':'✅ Güncellendi';toast(yeniMi?'Teklif kaydedildi':'Teklif güncellendi')}
+ catch(e){$('kmMsg').textContent='⚠️ '+(e.message||e)}}
+const DURUM={taslak:'Taslak',gonderildi:'Gönderildi',kabul:'Kabul',red:'Red',tamamlandi:'Tamamlandı'};
+async function kayitYukle(){const tok=await oturumTok();$('girisKart').classList.toggle('hide',!!tok);$('kayitAlan').classList.toggle('hide',!tok);if(!tok)return;
+ $('kListe').innerHTML='<p class="mut">Yükleniyor…</p>';
+ const r=await sbc.from('tk_teklifler').select('*,tk_musteriler(ad,telefon,ilce,kaynak)').order('created_at',{ascending:false}).limit(500);
+ if(r.error){$('kListe').innerHTML='<p class="warn">'+r.error.message+'</p>';return}KAYIT=r.data;kayitCiz()}
+function kayitCiz(){const q=norm($('kAra').value.trim()),L=KAYIT.filter(t=>{const m=t.tk_musteriler||{};return !q||norm([m.ad,m.telefon,m.ilce].join(' ')).includes(q)});
+ const aktif=KAYIT.filter(t=>t.durum!=='taslak'),kaz=KAYIT.filter(t=>t.durum==='kabul'||t.durum==='tamamlandi'),bit=KAYIT.filter(t=>t.durum==='tamamlandi'&&t.gercek_maliyet!=null);
+ const ciro=kaz.reduce((a,t)=>a+ +t.toplam,0),m2=kaz.reduce((a,t)=>a+(+t.alan||0),0),gK=bit.reduce((a,t)=>a+(t.toplam-t.gercek_maliyet),0),tK=bit.reduce((a,t)=>a+ +t.kar,0);
+ const kp=(l,d)=>`<div><div class="lb">${l}</div><b>${d}</b></div>`;
+ $('rKpi').innerHTML=kp('Teklif',KAYIT.length)+kp('Kabul oranı',aktif.length?'%'+Math.round(kaz.length/aktif.length*100):'–')+kp('Kazanılan ciro',tl(ciro))+kp('Ortalama m² fiyatın',m2?tl(Math.round(ciro/m2)):'–')+(bit.length?kp('Gerçek kâr (biten '+bit.length+' iş)',tl(Math.round(gK)))+kp('Tahmin ettiğin kâr',tl(Math.round(tK))):'');
+ const say={};kaz.forEach(t=>(t.bitkiler||[]).forEach(b=>{say[b.ad]=(say[b.ad]||0)+(+b.adet||0)}));const en=Object.entries(say).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ $('rBitki').innerHTML=en.length?'🌿 En çok kullandığın bitkiler (kazanılan işler):<br>'+en.map(([a,n])=>'• '+a+' — '+n+' adet').join('<br>'):'Kabul edilen teklif oldukça burada en çok kullandığın bitkiler ve ortalama fiyatların çıkar.';
+ $('kListe').innerHTML=L.length?L.map(t=>{const m=t.tk_musteriler||{},d=new Date(t.created_at),yz=t.maliyet?Math.round(t.kar/t.maliyet*100):0,gk=t.gercek_maliyet!=null?t.toplam-t.gercek_maliyet:null;
+  return `<div style="padding:12px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:8px"><b>${m.ad||'—'}</b><b>${tl(t.toplam)}</b></div>
+  <div class="mut" style="font-size:13px">${d.toLocaleDateString('tr-TR')} · ${t.alan||'?'} m²${m.ilce?' · '+m.ilce:''}${m.kaynak?' · '+m.kaynak:''} · kâr %${yz}</div>
+  <div style="display:flex;gap:6px;margin-top:8px;align-items:center"><select onchange="durumYaz('${t.id}',this.value)" style="flex:1">${Object.entries(DURUM).map(([k,a])=>`<option value="${k}"${k===t.durum?' selected':''}>${a}</option>`).join('')}</select><button class="btn sec" onclick="teklifAc('${t.id}')">Aç</button>${m.telefon?`<a class="btn sec" style="text-decoration:none" href="https://wa.me/90${m.telefon}">💬</a>`:''}</div>
+  ${t.durum==='tamamlandi'?`<div style="display:flex;gap:6px;margin-top:8px;align-items:center"><span class="mut" style="flex:1;font-size:13px">Gerçek maliyet${gk!=null?` → gerçek kâr <b class="${gk>=0?'pos':'neg'}">${tl(Math.round(gk))}</b>`:''}</span><input type="number" inputmode="decimal" style="width:110px" value="${t.gercek_maliyet??''}" placeholder="TL" onchange="gercekYaz('${t.id}',this.value)"></div>`:''}</div>`}).join(''):'<p class="mut">Henüz kayıt yok. Gönder sekmesinden "💾 Kaydet" ile ilk teklifini kaydet.</p>'}
+async function durumYaz(id,d){const r=await sbc.from('tk_teklifler').update({durum:d}).eq('id',id);if(r.error){toast('Hata: '+r.error.message);return}const t=KAYIT.find(x=>x.id===id);if(t)t.durum=d;kayitCiz();toast('Durum: '+DURUM[d])}
+async function gercekYaz(id,val){const g=val===''?null:+val;const r=await sbc.from('tk_teklifler').update({gercek_maliyet:g}).eq('id',id);if(r.error){toast('Hata: '+r.error.message);return}const t=KAYIT.find(x=>x.id===id);if(t)t.gercek_maliyet=g;kayitCiz();toast('Kaydedildi')}
+function teklifAc(id){const t=KAYIT.find(x=>x.id===id);if(!t)return;const dv=t.durum_verisi||{},m=t.tk_musteriler||{};
+ Object.entries(dv).forEach(([k,val])=>{const e=$(k);if(!e)return;if(typeof val==='boolean')e.checked=val;else e.value=val});
+ secili=[];const kayip=[];(t.bitkiler||[]).forEach(b=>{const d=DATA.find(x=>x.ad===b.ad&&x.firma===b.firma)||DATA.find(x=>x.ad===b.ad);if(d)secili.push({i:d.i,adet:b.adet,agac:b.agac});else kayip.push(b.ad)});
+ $('musteri').value=m.ad||'';$('kmTel').value=m.telefon?'0'+m.telefon:'';$('kmIlce').value=m.ilce||'';if(m.kaynak)$('kmKaynak').value=m.kaynak;$('kmDurum').value=['taslak','gonderildi','kabul'].includes(t.durum)?t.durum:'kabul';
+ curId=t.id;$('kmMsg').textContent='Bu teklifi düzenliyorsun, Kaydet güncelleme yapar.';tab(1);hesap();toast(kayip.length?'Açıldı · katalogda bulunamayan: '+kayip.join(', '):'Teklif açıldı')}
+$('kAra').addEventListener('input',kayitCiz);
 function aiCoz(){const t=$('aiMetin').value;aiSat=[];
  t.split(/[,;\n]|\s+ve\s+/).forEach(seg=>{const r=seg.match(/~?\s*(\d+)\s*(?:adet\s+)?([^\d].*)/);if(!r)return;const ad=r[2].trim();if(!ad)return;aiSat.push({ad,adet:+r[1],aday:aiAday(ad),sec:0})});
  aiCiz()}

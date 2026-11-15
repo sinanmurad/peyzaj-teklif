@@ -4,14 +4,16 @@
 // yaklaşık adetlerini sayar (Gemini, onizleme-ai ile aynı analiz modeli).
 // Görsel kaydedilmez, Telegram'a gitmez, sadece JSON döner.
 //
-// GÜVENLİK: Uygulama herkese açık olduğu için her istekte "x-teklif-anahtar"
-// başlığı TEKLIF_ANAHTAR secret'ı ile eşleşmeli; yoksa Gemini çağrılmaz.
+// GÜVENLİK: Sadece admin (sinanmurat34@gmail.com) oturumuyla çağrılabilir;
+// oturum yoksa Gemini çağrılmaz, kredi harcanmaz.
 //
-// Secret'lar: GEMINI_API_KEY (zaten var), TEKLIF_ANAHTAR (yeni)
+// Secret'lar: GEMINI_API_KEY (zaten var). SUPABASE_URL / SUPABASE_ANON_KEY otomatik.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const ADMIN = 'sinanmurat34@gmail.com';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-teklif-anahtar',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const MODEL = 'gemini-3.1-flash-lite-image';
@@ -37,9 +39,11 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonRes({ error: 'Sadece POST' }, 405);
 
   const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-  const ANAHTAR = Deno.env.get('TEKLIF_ANAHTAR');
-  if (!GEMINI_API_KEY || !ANAHTAR) return jsonRes({ error: 'Sunucu ayarı eksik (GEMINI_API_KEY / TEKLIF_ANAHTAR)' }, 500);
-  if (req.headers.get('x-teklif-anahtar') !== ANAHTAR) return jsonRes({ error: 'Anahtar hatalı' }, 401);
+  if (!GEMINI_API_KEY) return jsonRes({ error: 'Sunucu ayarı eksik (GEMINI_API_KEY)' }, 500);
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
+  const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
+  const { data: u } = await sb.auth.getUser(token);
+  if (!u?.user || (u.user.email || '').toLowerCase() !== ADMIN) return jsonRes({ error: 'Giriş gerekli' }, 401);
 
   let gorsel = '', mime = 'image/jpeg', not = '';
   try {
