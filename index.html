@@ -230,7 +230,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
   </div></div>
  <div class="card"><h2>🛡️ Gizli kayıplar</h2><p class="mut" style="margin-top:-6px">Müşteri görmez, maliyetine eklenir.</p>
   <div class="grid">
-   <div><label>Toprak fire (%)</label><input id="gFT" type="number" inputmode="decimal" value="15"></div>
+   <div><label>Toprak fire (%)</label><input id="gFT" type="number" inputmode="decimal" value="10"></div>
    <div><label>Çim fire (%)</label><input id="gFC" type="number" inputmode="decimal" value="5"></div>
    <div><label>Genel gider (%)</label><input id="gGen" type="number" inputmode="decimal" value="10"></div>
   </div>
@@ -243,6 +243,9 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>Mevsimlik çiçek (adet/m²)</label><input id="pCic" type="number" inputmode="decimal" value="16"></div>
    <div><label>Bodur ağaç arası (m)</label><input id="fAB" type="number" inputmode="decimal" value="3"></div>
    <div><label>Büyük taçlı ağaç arası (m)</label><input id="fAK" type="number" inputmode="decimal" value="7.5"></div>
+   <div><label>Bodur ağaç duvara mesafe (m)</label><input id="fABk" type="number" inputmode="decimal" value="0.5"></div>
+   <div><label>Büyük ağaç duvara mesafe (m)</label><input id="fAKk" type="number" inputmode="decimal" value="3"></div>
+   <div><label>Çalı/çiçek alanı toprak derinliği (cm)</label><input id="gTD" type="number" inputmode="decimal" value="30"></div>
   </div>
   <button class="btn sec full" style="margin-top:12px" onclick="sifirla()">Bu sayfadaki sayıları varsayılana döndür</button></div>
  <div class="card"><h2>🏷️ Firma bilgilerin</h2>
@@ -757,7 +760,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['fAB','fAK','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
+const AYAR=['fAB','fAK','fABk','fAKk','gTD','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mAbone','mBakim'];
 const EKIS=[['eSok','eski çim/bitki sökümü'],['eMol','moloz atımı'],['eTes','tesviye'],['eDre','drenaj'],['eAyd','bahçe aydınlatması']];
 const ekSecili=()=>EKIS.filter(([i])=>$(i).checked);
@@ -770,7 +773,7 @@ $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('m
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={fAB:3,fAK:7.5,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:15,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
+const VARS={fAB:3,fAK:7.5,fABk:0.5,fAKk:3,gTD:30,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -807,9 +810,9 @@ function sil(i){secili=secili.filter(s=>s.i!==i);hesap()}
 function adet(i,val){const x=secili.find(s=>s.i===i);if(x)x.adet=Math.max(1,parseInt(val)||1);hesap(false)}
 function hesap(seciliCiz=true){kaydet();{const en=v('bEn'),boy=v('bBoy');if(en>0&&boy>0){$('alan').value=n1(en*boy);$('alan').readOnly=true;$('olcuNot').textContent=`${en} × ${boy} m = ${$('alan').value} m²`}else{$('alan').readOnly=false;$('olcuNot').textContent='En ve boyu girersen alan kendiliğinden hesaplanır. Bahçe düzgün değilse sadece m² gir.'}}
  const alan=v('alan'),kal=v('kal');
- const m3=alan*kal/100;
  const kal_=[];
- const ER=elems.map(e=>[e,elHesap(e)]),dolu=ER.filter(([e])=>e.tip==='alan'||e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),cimA=n1(Math.max(0,alan-dolu));
+ const ER=elems.map(e=>[e,elHesap(e)]),tarh=ER.filter(([e])=>e.tip==='alan').reduce((a,[,r])=>a+(r.m2||0),0),zem=ER.filter(([e])=>e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),dolu=tarh+zem,cimA=n1(Math.max(0,alan-dolu));
+ const m3=Math.max(0,alan-dolu)*kal/100+Math.min(tarh,alan)*v('gTD')/100;
  const m3A=m3*(1+v('gFT')/100),alanC=cimA*(1+v('gFC')/100);
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3A/tk),kalan=m3A-tir*tk,kucuk=0;
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
@@ -922,9 +925,9 @@ let elems=[],elSay=0;
 const ZEM={cak:['Çakıl','zgCak'],tas:['Doğal taş','zgTas'],dek:['Ahşap deck','zgDek'],kar:['Karo / kilit taşı','zgKar']};
 const ALANT={cal:['Çalı','pCal'],bod:['Yer örtücü / bodur','pBod'],cic:['Mevsimlik çiçek','pCic']};
 const n1=x=>Math.round(x*10)/10;
-function agacSigar(a,b,buyuk){const s=buyuk?(v('fAK')||7.5):(v('fAB')||3);const f=d=>d<s/2?0:(buyuk?Math.max(1,Math.floor(d/s)):Math.floor(d/s)+1);return f(a)*f(b)}
+function agacSigar(a,b,buyuk){const s=buyuk?(v('fAK')||7.5):(v('fAB')||3),k=buyuk?v('fAKk'):v('fABk');const f=d=>d<2*k||d<=0?0:Math.floor((d-2*k)/s)+1;return f(a)*f(b)}
 function elHesap(e){const r={};
- if(e.tip==='agac'){const ae=+e.en||v('bEn'),ab=+e.boy||v('bBoy');r.max=agacSigar(ae,ab,e.tur==='buyuk');r.oto=r.max;r.not=!(ae&&ab)?'Ölçüyü gir':r.max?`Bu alana en fazla ${r.max} ${e.tur==='buyuk'?'büyük taçlı':'bodur'} ağaç sığar (${e.tur==='buyuk'?v('fAK'):v('fAB')} m arayla)`:`Bu ölçüye ${e.tur==='buyuk'?'büyük taçlı ağaç sığmaz, en az '+n1((v('fAK')||7.5)/2)+' m genişlik gerekir':'ağaç sığmaz'}`}
+ if(e.tip==='agac'){const ae=+e.en||v('bEn'),ab=+e.boy||v('bBoy');r.max=agacSigar(ae,ab,e.tur==='buyuk');r.oto=r.max;r.not=!(ae&&ab)?'Ölçüyü gir':r.max?`Bu alana en fazla ${r.max} ${e.tur==='buyuk'?'büyük taçlı':'bodur'} ağaç sığar (${e.tur==='buyuk'?v('fAK'):v('fAB')} m arayla, duvara ${e.tur==='buyuk'?v('fAKk'):v('fABk')} m)`:`Bu ölçüye ${e.tur==='buyuk'?'büyük taçlı ağaç önerilmez: duvara '+v('fAKk')+' m mesafe için en az '+n1(2*v('fAKk'))+' m genişlik gerekir':'ağaç sığmaz'}`}
  else if(e.tip==='cit'){const ara=Math.min(1.5,Math.max(.3,.25+.25*(+e.bh||1)));r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${Math.round(ara*100)} cm ara = ${r.oto} bitki`:'Uzunluğu gir'}
  else if(e.tip==='sar'){const ara=v('pSar')||1;r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${ara} m ara = ${r.oto} sarmaşık`:'Duvar uzunluğunu gir'}
  else if(e.tip==='alan'){const t=ALANT[e.tur||'cal'];r.m2=(+e.en||0)*(+e.boy||0);r.oto=Math.ceil(r.m2*v(t[1]));r.not=r.m2?`${n1(r.m2)} m² × ${v(t[1])} adet = ${r.oto} bitki`:'Ölçüyü gir'}
