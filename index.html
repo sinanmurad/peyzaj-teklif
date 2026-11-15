@@ -95,7 +95,11 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
    <div><label>🍀 Bodur / yer örtücü (m²)</label><input id="zBod" type="number" inputmode="decimal" value="0"></div>
    <div><label>🌸 Mevsimlik çiçek (m²)</label><input id="zCic" type="number" inputmode="decimal" value="0"></div>
   </div>
-  <div id="planOut" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div></details></div>
+  <div id="planOut" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div>
+  <div style="margin-top:16px;font-weight:700">🤖 AI önizleme listesinden ekle</div>
+  <p class="mut" style="margin:4px 0 8px">Telegram'a gelen "AI'nın görselde gördüğü" satırını kopyalayıp buraya yapıştır. Bitkileri katalogda bulur, adetleriyle önerir.</p>
+  <textarea id="aiMetin" style="min-height:80px" placeholder="~400 şimşir (Buxus) çiti, ~15 konik mazı (Thuja), ~25 lavanta çalısı…"></textarea>
+  <div id="aiOut" style="margin-top:8px"></div></details></div>
  <div class="card"><h2><span class="step">2</span>Ağaç ve çalılar</h2>
   <div class="search"><input id="q" type="search" placeholder="Ara: çınar, zeytin, 20-25Q…" autocomplete="off"></div>
   <select id="qt" class="hide"><option value="">Hepsi</option></select>
@@ -734,7 +738,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,5].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr'}[n];window.scrollTo(0,0);if(n===2)katalog()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('aiMetin').value='';aiSat=[];aiCiz();$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -788,6 +792,18 @@ function hesap(seciliCiz=true){kaydet();
  const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
  $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kalemMetni(kal_,ag,m3,alan)+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+($('mHaric').value.trim()?`Dahil değildir: ${$('mHaric').value.trim()}\n`:'')+($('mBakim').value.trim()?`${$('mBakim').value.trim()}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
+const AI_ATLA=['çiti','cit','çalısı','calisi','ağacı','agaci','adet','bitki','bitkisi','fidanı','fidan','grubu','yaklaşık','dekoratif','küçük','büyük','tane'];
+let aiSat=[];
+function aiAday(ad){const ks=norm(ad).replace(/[()]/g,' ').split(/[^a-zçğıöşü0-9]+/).filter(w=>w.length>=4&&!AI_ATLA.includes(w));
+ const kok=w=>w.replace(/(ları|leri|lar|ler|ı|i|u|ü)$/,'');const K=ks.map(w=>w.length>5?kok(w):w);
+ return DATA.map(d=>{const n=norm(d.ad);return{d,s:K.filter(k=>n.includes(k)).length}}).filter(x=>x.s>0).sort((a,b)=>b.d.stok-a.d.stok||b.s-a.s||a.d.fiyat-b.d.fiyat).slice(0,10).map(x=>x.d)}
+function aiCoz(){const t=$('aiMetin').value;aiSat=[];
+ t.split(/[,;\n]|\s+ve\s+/).forEach(seg=>{const r=seg.match(/~?\s*(\d+)\s*(?:adet\s+)?([^\d].*)/);if(!r)return;const ad=r[2].trim();if(!ad)return;aiSat.push({ad,adet:+r[1],aday:aiAday(ad),sec:0})});
+ aiCiz()}
+function aiCiz(){if(!aiSat.length){$('aiOut').innerHTML=$('aiMetin').value.trim()?'<p class="mut">Sayı içeren bitki bulunamadı.</p>':'';return}
+ $('aiOut').innerHTML=aiSat.map((s,i)=>`<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="font-size:14px"><b>${s.adet}</b> × ${s.ad}</div>`+(s.aday.length?`<div style="display:flex;gap:6px;margin-top:6px"><select onchange="aiSat[${i}].sec=+this.value" style="flex:1;min-width:0">${s.aday.map((d,j)=>`<option value="${j}">${d.ad} – ${tl(d.fiyat)}${d.stok?'':' (tükendi)'} · ${d.firma}</option>`).join('')}</select><input type="number" inputmode="numeric" value="${s.adet}" style="width:70px" oninput="aiSat[${i}].adet=Math.max(1,parseInt(this.value)||1)"><button class="btn" onclick="aiEkle(${i})">Ekle</button></div>`:'<div class="mut" style="margin-top:4px">Katalogda yok (malzeme ya da farklı isim olabilir, elle ara)</div>')+'</div>').join('')+(aiSat.some(s=>s.aday.length)?'<button class="btn full" style="margin-top:8px" onclick="aiHepsi()">Bulunanların hepsini teklife ekle</button>':'')}
+function aiEkle(i,sessiz){const s=aiSat[i];if(!s||!s.aday.length)return;const d=s.aday[s.sec];const x=secili.find(z=>z.i===d.i);if(x)x.adet+=s.adet;else secili.push({i:d.i,adet:s.adet,agac:agacMi(d)});if(!sessiz){hesap();toast(s.adet+' × '+d.ad.slice(0,28)+' eklendi')}}
+function aiHepsi(){let n=0;aiSat.forEach((s,i)=>{if(s.aday.length){aiEkle(i,true);n++}});hesap();toast(n+' kalem teklife eklendi')}
 function planCiz(ag,alan,lim,agSay){const z={cit:v('zCit')*v('pCit'),cal:v('zCal')*v('pCal'),bod:v('zBod')*v('pBod'),cic:v('zCic')*v('pCic')};
  const top=Math.round(z.cit+z.cal+z.bod+z.cic),m2=v('zCal')+v('zBod')+v('zCic'),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
  if(!top){$('planOut').innerHTML='<span class="mut">Alan girince sonuç burada çıkar.</span>';return}
@@ -837,6 +853,7 @@ CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textCon
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
 ['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+$('aiMetin').addEventListener('input',aiCoz);
 $('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;oranKaydet();$('kOn').checked=true;hesap()});
 $('kOran').addEventListener('input',()=>{oranKaydet();$('kRng').value=Math.min(200,v('kOran'));hesap()});
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
