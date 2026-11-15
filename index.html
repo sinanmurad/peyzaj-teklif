@@ -239,7 +239,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
   <div class="grid">
    <div><label>Toprak fire (%)</label><input id="gFT" type="number" inputmode="decimal" value="10"></div>
    <div><label>Çim fire (%)</label><input id="gFC" type="number" inputmode="decimal" value="10"></div>
-   <div><label>Genel gider (%)</label><input id="gGen" type="number" inputmode="decimal" value="0"></div>
+   <input id="gGen" type="hidden" value="0">
   </div>
   <p class="mut" style="margin-bottom:0"><b>Fire:</b> toprak sıkışır, çim kenarlarda kesilir, fazlası alınır.<br><b>Genel gider:</b> araç, alet, telefon, reklam. Aylık bu masraflarını aylık cirona böl, çıkan yüzde bu sayıdır.</p></div>
  <div class="card"><h2>🌱 Dikim kuralları</h2>
@@ -779,10 +779,9 @@ try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
 $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');if(s.sTopN==null&&s.sTop=='1250')s.sTop='1125';AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 $('kBN').value=v('fBN')||10000;
-try{if(!localStorage.getItem('peyzajGenV1')){$('gGen').value=0;localStorage.setItem('peyzajGenV1','1');kaydet()}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 try{if(!localStorage.getItem('peyzajFireV1')){if(v('gFC')<10){$('gFC').value=10;kaydet()}localStorage.setItem('peyzajFireV1','1')}}catch(e){}
 try{if(!localStorage.getItem('peyzajAlisV2')){$('gCim').value=240;$('gSul').value=267;localStorage.setItem('peyzajAlisV2','1');kaydet()}}catch(e){}
-try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
 const VARS={fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:240,gSul:267,kYev:1500,gFT:10,gFC:10,gGen:0,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
@@ -839,7 +838,7 @@ function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==n
  const ag=[...secili,...planAg()].map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac,buyuk:s.buyuk??buyukMu(DATA[s.i])}));
  const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('kBN'):0;
  ag.forEach(d=>{const pn=bAlis?bN*d.fiyat*d.adet/bAlis:0;kal_.push([d.ad+' × '+d.adet,0,d.firma,d.adet*d.fiyat+pn])});
- const isG=v('kIsci')*v('kGun')*v('kYev')+v('kDig')+ekToplam(),malK=kal_.reduce((a,k)=>a+k[3],0),gen=(malK+isG)*v('gGen')/100,malT=malK+isG+gen;
+ const isG=v('kIsci')*v('kGun')*v('kYev')+v('kDig')+ekToplam(),malK=kal_.reduce((a,k)=>a+k[3],0),gen=0,malT=malK+isG+gen;
  const stdT=0;
  const nZ=kal_.length-ag.length,Zc=kal_.slice(0,nZ).reduce((a,k)=>a+k[3],0),hedef=Zc>0?kal_.slice(0,nZ):kal_,hc=Zc>0?Zc:malK;
  // işçilik zemin/çim/sulama kalemlerine dağılır; bitkiler sadece alış+nakliye+kâr (müşteri internetten kıyaslayabiliyor)
@@ -991,7 +990,7 @@ function kontrolCiz(L,top){const K=KONT,c=[],kO=v('kOran')/100,tl0=x=>tl(Math.ro
   if(KONT_BI)c.push(['g',`🌱 Sadece bitki işi: müşteriye ${tl0(bf)}, sitedeki fiyatları ${tl0(K.bAlis)}. Dikim işçiliği ve kâr bitki fiyatının içinde.`]);else c.push([x>2.5?'r':'g',`🌱 Bitkiler müşteriye ${tl0(bf)}, sitedeki fiyatları ${tl0(K.bAlis)} → ${x.toFixed(1).replace('.',',')} katı.`+(x>2.5?' Müşteri internetten bakarsa pahalı bulur. '+(K.bN>K.bAlis?'Nakliyeyi düşür.':'Kârı düşür.'):' Makul.')])}
  const zg=L.filter(k=>!(k[2]&&/ × \d+$/.test(k[0]))).reduce((a,k)=>a+yuv(k[1]),0);
  if(zg&&K.alan)c.push(['g',`🟩 Zemin + çim + sulama: m² başına ${tl0(zg/K.alan)} (müşterinin gördüğü).`]);
- c.push(['g',`💰 Kâr kontrolü: maliyet ${tl0(K.malK+K.isG)} × %${v('kOran')} = ${tl0((K.malK+K.isG)*kO)} kâr.`]);
+ {const m=K.malK+K.isG,kr=top-m;c.push(['g',`💰 Maliyet ${tl0(m)} + kâr ${tl0(kr)} (%${Math.round(kr/m*100)}) = ${tl0(top)}. Fark yuvarlamadan.`])}
  $('kKont').innerHTML=c.map(([t,s])=>`<div style="padding:8px 10px;border-radius:10px;margin-bottom:6px;font-size:14px;background:${t==='r'?'#fdecea':'#eef5f1'};color:${t==='r'?'#a8261b':'var(--ink)'}">${s}</div>`).join('')}
 function karCiz(L,top,mal,isG,std,K,gen){const kar=top-mal,y=mal?kar/mal*100:0,c=kar>=0?'pos':'neg',f=x=>'%'+Math.round(x);
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
