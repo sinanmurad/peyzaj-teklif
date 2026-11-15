@@ -9,11 +9,11 @@ CIKTI = os.path.join(KOK, 'fiyatlar.json')
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36',
       'Accept-Language': 'tr-TR,tr;q=0.9'}
 
-def getir(url, tekrar=3):
+def getir(url, tekrar=2):
     for d in range(tekrar):
         try:
             req = urllib.request.Request(url, headers=UA)
-            with urllib.request.urlopen(req, timeout=30) as r:
+            with urllib.request.urlopen(req, timeout=20) as r:
                 return r.read().decode('utf-8', 'replace'), r.headers
         except Exception as e:
             hata = e; time.sleep(2 + d * 3)
@@ -66,19 +66,27 @@ def main():
     rapor = []
 
     try:
+        print('enfidan.com okunuyor', flush=True)
         e = enfidan(); yeni['firmalar']['enfidan.com'] = e; rapor.append(f'enfidan.com: {len(e)} ürün')
     except Exception as ex:
         yeni['firmalar']['enfidan.com'] = eski.get('firmalar', {}).get('enfidan.com', {}); rapor.append(f'enfidan.com: HATA {ex}, eski değerler korundu')
 
     for firma, fn in (('Canlı Bahçe', canli), ('Usta Peyzaj', usta)):
         onceki = eski.get('firmalar', {}).get(firma, {})
-        d, ok, hata = {}, 0, 0
-        for it in [x for x in extra if x['firma'] == firma and x.get('img')]:
+        d, ok, hata, ardisik = {}, 0, 0, 0
+        L = [x for x in extra if x['firma'] == firma and x.get('img')]
+        print(f'{firma}: {len(L)} ürün okunuyor', flush=True)
+        for n, it in enumerate(L, 1):
             u = it['img']
+            if ardisik >= 5:  # site erişilemiyor: kalanlar için eski değer
+                if u in onceki: d[u] = onceki[u]
+                hata += 1; continue
             try:
-                r = fn(u)
-            except Exception:
-                r = None
+                r = fn(u); ardisik = 0
+            except Exception as ex:
+                r = None; ardisik += 1
+                print(f'  hata: {u} {ex}', flush=True)
+            if n % 50 == 0: print(f'  {n}/{len(L)}', flush=True)
             if r and r[0] > 0:
                 d[u] = r; ok += 1
             else:
