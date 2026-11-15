@@ -96,8 +96,10 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
    <div><label>🌸 Mevsimlik çiçek (m²)</label><input id="zCic" type="number" inputmode="decimal" value="0"></div>
   </div>
   <div id="planOut" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div>
-  <div style="margin-top:16px;font-weight:700">🤖 AI önizleme listesinden ekle</div>
-  <p class="mut" style="margin:4px 0 8px">Telegram'a gelen "AI'nın görselde gördüğü" satırını kopyalayıp buraya yapıştır. Bitkileri katalogda bulur, adetleriyle önerir.</p>
+  <div style="margin-top:16px;font-weight:700">🤖 Görselden bitki say</div>
+  <p class="mut" style="margin:4px 0 8px">Konsept görselini ya da bahçe fotoğrafını seç: AI bitkileri ve yaklaşık adetlerini sayar, katalogda bulup önerir. İstersen Telegram'daki "AI'nın görselde gördüğü" satırını da aşağıya yapıştırabilirsin.</p>
+  <label class="btn full" style="display:flex;justify-content:center;cursor:pointer">📷 Görsel seç ve say<input type="file" id="aiFoto" accept="image/*" style="display:none"></label>
+  <div id="aiDurum" class="mut" style="margin:6px 0"></div>
   <textarea id="aiMetin" style="min-height:80px" placeholder="~400 şimşir (Buxus) çiti, ~15 konik mazı (Thuja), ~25 lavanta çalısı…"></textarea>
   <div id="aiOut" style="margin-top:8px"></div></details></div>
  <div class="card"><h2><span class="step">2</span>Ağaç ve çalılar</h2>
@@ -179,6 +181,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <div style="margin-top:10px"><label>Dahil olmayanlar (sonradan "bu da dahil sanmıştım" demesinler)</label><input id="mHaric" value="Moloz atımı, eski bitki/çim sökümü, elektrik ve su bağlantısı"></div>
   <div style="margin-top:10px"><label>Bakım notu (bitki kurursa sorumluluk netleşsin)</label><input id="mBakim" value="Teslimden sonra sulama ve bakım müşteriye aittir."></div>
   <p class="mut" style="margin-bottom:0">Boş bırakırsan teklifte görünmez.</p>
+  <div style="margin-top:10px"><label>AI anahtarı (görselden bitki saymak için, bir kere gir)</label><input id="mAiKey" type="password" autocomplete="off" placeholder="Sana verdiğim anahtar"></div>
  </div>
  <div class="card"><h2>🌱 Dikim sıklığı</h2><p class="mut" style="margin-top:-6px">"Kaç bitki gerekir?" hesabı bu sayıları kullanır. Kendi alışkanlığına göre değiştir.</p>
   <div class="grid">
@@ -738,7 +741,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,5].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr'}[n];window.scrollTo(0,0);if(n===2)katalog()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('aiMetin').value='';aiSat=[];aiCiz();$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('aiMetin').value='';aiSat=[];aiCiz();$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -794,9 +797,22 @@ function hesap(seciliCiz=true){kaydet();
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kalemMetni(kal_,ag,m3,alan)+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+($('mHaric').value.trim()?`Dahil değildir: ${$('mHaric').value.trim()}\n`:'')+($('mBakim').value.trim()?`${$('mBakim').value.trim()}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
 const AI_ATLA=['çiti','cit','çalısı','calisi','ağacı','agaci','adet','bitki','bitkisi','fidanı','fidan','grubu','yaklaşık','dekoratif','küçük','büyük','tane'];
 let aiSat=[];
-function aiAday(ad){const ks=norm(ad).replace(/[()]/g,' ').split(/[^a-zçğıöşü0-9]+/).filter(w=>w.length>=4&&!AI_ATLA.includes(w));
+function aiAday(ad,tur){const ag=/ağaç|palmiye/.test(tur||'')||/ağac/.test(norm(ad));const ks=norm(ad).replace(/[()]/g,' ').split(/[^a-zçğıöşü0-9]+/).filter(w=>w.length>=4&&!AI_ATLA.includes(w));
  const kok=w=>w.replace(/(ları|leri|lar|ler|ı|i|u|ü)$/,'');const K=ks.map(w=>w.length>5?kok(w):w);
- return DATA.map(d=>{const n=norm(d.ad);return{d,s:K.filter(k=>n.includes(k)).length}}).filter(x=>x.s>0).sort((a,b)=>b.d.stok-a.d.stok||b.s-a.s||a.d.fiyat-b.d.fiyat).slice(0,10).map(x=>x.d)}
+ return DATA.map(d=>{const n=norm(d.ad);return{d,s:K.filter(k=>n.includes(k)).length}}).filter(x=>x.s>0).map(x=>({...x,t:agacMi(x.d)===ag?1:0})).sort((a,b)=>b.t-a.t||b.d.stok-a.d.stok||b.s-a.s||a.d.fiyat-b.d.fiyat).slice(0,10).map(x=>x.d)}
+const BP_URL='https://iyxygdinqnhzucltdjfr.supabase.co',BP_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5eHlnZGlucW5oenVjbHRkamZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0ODAyNzksImV4cCI6MjEwMDA1NjI3OX0.LPZeE3G_tPdUm53Lr0GB9KIBtSc1wvs-d2TYrHW0VFA';
+try{$('mAiKey').value=localStorage.getItem('peyzajAiKey')||''}catch(e){}
+$('mAiKey').addEventListener('input',()=>{try{localStorage.setItem('peyzajAiKey',$('mAiKey').value.trim())}catch(e){}});
+function gorselKucult(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const m=1280,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.85).split(',')[1])};im.onerror=()=>no(new Error('Görsel açılamadı'));im.src=u})}
+async function aiFotoSay(f){const key=$('mAiKey').value.trim();if(!key){toast('Önce Ayarlar\'a AI anahtarını gir');tab(3);$('mAiKey').focus();return}
+ $('aiDurum').textContent='⏳ AI görseli inceliyor (10-20 sn)…';
+ try{const g=await gorselKucult(f);const r=await fetch(BP_URL+'/functions/v1/bitki-say',{method:'POST',headers:{'Content-Type':'application/json',apikey:BP_ANON,Authorization:'Bearer '+BP_ANON,'x-teklif-anahtar':key},body:JSON.stringify({gorsel:g,mime:'image/jpeg',not:v('alan')?'Bahçe yaklaşık '+v('alan')+' m²':''})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.basarili)throw new Error(r.status===401?'AI anahtarı hatalı':(j.error||'HTTP '+r.status));
+  aiSat=j.bitkiler.map(b=>({ad:b.ad+(b.tur?' ('+b.tur+')':''),adet:b.adet,aday:aiAday(b.ad,b.tur),sec:0}));
+  $('aiMetin').value=j.bitkiler.map(b=>'~'+b.adet+' '+b.ad).join(', ')+(j.diger&&j.diger.length?', '+j.diger.join(', '):'');
+  aiCiz();$('aiDurum').textContent='✅ '+j.bitkiler.length+' bitki grubu bulundu'+(j.diger&&j.diger.length?' · diğer: '+j.diger.join(', '):'')+'. Adetler tahmini, üstteki alan hesabıyla karşılaştır.'}
+ catch(e){$('aiDurum').textContent='⚠️ '+e.message}}
+$('aiFoto').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)aiFotoSay(f)});
 function aiCoz(){const t=$('aiMetin').value;aiSat=[];
  t.split(/[,;\n]|\s+ve\s+/).forEach(seg=>{const r=seg.match(/~?\s*(\d+)\s*(?:adet\s+)?([^\d].*)/);if(!r)return;const ad=r[2].trim();if(!ad)return;aiSat.push({ad,adet:+r[1],aday:aiAday(ad),sec:0})});
  aiCiz()}
