@@ -87,6 +87,15 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <div id="cimBox" style="padding-bottom:10px"><label>Çimi hangi firmadan alacaksın? (fiyatı değiştirmez, sipariş listesine eklenir)</label><select id="cimK"><option value="-1">Seçilmedi</option></select></div>
   <label class="sw">Otomatik sulama <input type="checkbox" id="cSul" class="tgl" checked></label>
  </div>
+ <div class="card"><details id="planD"><summary style="font-weight:700;font-size:16px;cursor:pointer">📐 Kaç bitki gerekir? <span class="mut" style="font-weight:500;font-size:13px">(sadece sende, teklife girmez)</span></summary>
+  <p class="mut" style="margin:8px 0">Konseptte/fotoğrafta gördüğün alanları kabaca gir, gereken bitki sayısını hesaplasın. Teklifteki sayıyla karşılaştırır.</p>
+  <div class="grid">
+   <div><label>🌲 Çit uzunluğu (metre)</label><input id="zCit" type="number" inputmode="decimal" value="0"></div>
+   <div><label>🌿 Çalı tarhı (m²)</label><input id="zCal" type="number" inputmode="decimal" value="0"></div>
+   <div><label>🍀 Bodur / yer örtücü (m²)</label><input id="zBod" type="number" inputmode="decimal" value="0"></div>
+   <div><label>🌸 Mevsimlik çiçek (m²)</label><input id="zCic" type="number" inputmode="decimal" value="0"></div>
+  </div>
+  <div id="planOut" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div></details></div>
  <div class="card"><h2><span class="step">2</span>Ağaç ve çalılar</h2>
   <div class="search"><input id="q" type="search" placeholder="Ara: çınar, zeytin, 20-25Q…" autocomplete="off"></div>
   <select id="qt" class="hide"><option value="">Hepsi</option></select>
@@ -167,6 +176,14 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <div style="margin-top:10px"><label>Bakım notu (bitki kurursa sorumluluk netleşsin)</label><input id="mBakim" value="Teslimden sonra sulama ve bakım müşteriye aittir."></div>
   <p class="mut" style="margin-bottom:0">Boş bırakırsan teklifte görünmez.</p>
  </div>
+ <div class="card"><h2>🌱 Dikim sıklığı</h2><p class="mut" style="margin-top:-6px">"Kaç bitki gerekir?" hesabı bu sayıları kullanır. Kendi alışkanlığına göre değiştir.</p>
+  <div class="grid">
+   <div><label>Çit (adet/metre)</label><input id="pCit" type="number" inputmode="decimal" value="2"></div>
+   <div><label>Çalı tarhı (adet/m²)</label><input id="pCal" type="number" inputmode="decimal" value="3"></div>
+   <div><label>Bodur / yer örtücü (adet/m²)</label><input id="pBod" type="number" inputmode="decimal" value="6"></div>
+   <div><label>Mevsimlik çiçek (adet/m²)</label><input id="pCic" type="number" inputmode="decimal" value="16"></div>
+  </div>
+  <p class="mut" style="margin-bottom:0">Örnek: çitte 50 cm arayla dikersen metreye 2 bitki düşer.</p></div>
  <div class="card"><h2>⚙️ Birim fiyatlar</h2>
   <div class="grid">
    <div><label>Toprak (TL/m³)</label><input id="fTop" type="number" inputmode="decimal" value="1500"></div>
@@ -690,7 +707,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen'];
+const AYAR=['fTop','fCim','fSul','fPay','fDA','fDC','fLim','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pCit','pCal','pBod','pCic'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mHaric','mBakim'];
 try{$('mGrup').checked=localStorage.getItem('peyzajGrup')!=='0'}catch(e){}
 $('mGrup').addEventListener('change',()=>{try{localStorage.setItem('peyzajGrup',$('mGrup').checked?'1':'0')}catch(e){};hesap()});
@@ -699,7 +716,7 @@ $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('m
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:15,gFC:5,gGen:10};
+const VARS={fTop:1500,fCim:190,fSul:320,fPay:25,fDA:1000,fDC:130,fLim:10,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:15,gFC:5,gGen:10,pCit:2,pCal:3,pBod:6,pCic:16};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -717,7 +734,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,5].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr'}[n];window.scrollTo(0,0);if(n===2)katalog()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -754,6 +771,7 @@ function hesap(seciliCiz=true){kaydet();
  const agSay=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0);
  const lim=Math.floor(alan/(v('fLim')||10));
  $('agWarn').textContent=agSay>lim?`Uyarı: ${alan} m² için en fazla ${lim} ağaç önerilir, şu an ${agSay}.`:(lim?`Ağaç: ${agSay} / en fazla ${lim}`:'');
+ planCiz(ag,alan,lim,agSay);
  const tukendi=ag.filter(d=>!d.stok);
  const sus=AYAR.filter(k=>k!=='fLim'&&VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
  if(seciliCiz)$('sel').innerHTML=ag.length?ag.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · dikim: <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a></div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
@@ -770,6 +788,16 @@ function hesap(seciliCiz=true){kaydet();
  const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
  $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kalemMetni(kal_,ag,m3,alan)+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+($('mHaric').value.trim()?`Dahil değildir: ${$('mHaric').value.trim()}\n`:'')+($('mBakim').value.trim()?`${$('mBakim').value.trim()}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
+function planCiz(ag,alan,lim,agSay){const z={cit:v('zCit')*v('pCit'),cal:v('zCal')*v('pCal'),bod:v('zBod')*v('pBod'),cic:v('zCic')*v('pCic')};
+ const top=Math.round(z.cit+z.cal+z.bod+z.cic),m2=v('zCal')+v('zBod')+v('zCic'),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
+ if(!top){$('planOut').innerHTML='<span class="mut">Alan girince sonuç burada çıkar.</span>';return}
+ const sat=(t,n,b)=>n?`<div>${t}: <b>${Math.round(n)} adet</b> <span class="mut">(${b})</span></div>`:'';
+ let o=sat('🌲 Çit bitkisi',z.cit,v('zCit')+' m × '+v('pCit'))+sat('🌿 Çalı',z.cal,v('zCal')+' m² × '+v('pCal'))+sat('🍀 Bodur/yer örtücü',z.bod,v('zBod')+' m² × '+v('pBod'))+sat('🌸 Mevsimlik çiçek',z.cic,v('zCic')+' m² × '+v('pCic'));
+ o+=`<div style="margin-top:6px">🌳 Ağaç: en fazla <b>${lim}</b> (${alan} m² için), teklifte ${agSay}</div>`;
+ const fark=cS-top,oran=top?Math.abs(fark)/top:0;
+ o+=`<div style="margin-top:8px;padding:8px 10px;border-radius:10px;background:${oran<=.15?'#e8f5ec':'#fff4e5'}">Toplam gereken: <b>${top}</b> çalı/süs bitkisi · Teklifte: <b>${cS}</b> → `+(oran<=.15?'✅ uygun':fark<0?`⚠️ <b>${-fark} eksik</b>, alan boş kalır`:`⚠️ <b>${fark} fazla</b>, sık olur ya da fiyat şişer`)+`</div>`;
+ if(m2>alan)o+=`<div class="warn" style="margin-top:6px">Bitki alanları toplamı (${m2} m²) bahçeden (${alan} m²) büyük, ölçüleri kontrol et.</div>`;
+ $('planOut').innerHTML=o}
 function karCiz(L,top,mal,isG,std,K,gen){const kar=top-mal,y=mal?kar/mal*100:0,c=kar>=0?'pos':'neg',f=x=>'%'+Math.round(x);
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
@@ -808,7 +836,7 @@ let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csv
 CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.ad+' – '+c.fiyat+' TL/m²';$('cimK').appendChild(o)});
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
-['kIsci','kGun','kDig'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 $('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;oranKaydet();$('kOn').checked=true;hesap()});
 $('kOran').addEventListener('input',()=>{oranKaydet();$('kRng').value=Math.min(200,v('kOran'));hesap()});
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
