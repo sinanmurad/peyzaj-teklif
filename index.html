@@ -104,6 +104,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>Alan (m²)</label><input id="alan" type="number" inputmode="decimal" value="150"></div>
    <div><label>Toprak kalınlığı (cm)</label><input id="kal" type="number" inputmode="decimal" value="13"></div>
   </div>
+  <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap"><span class="mut" style="font-size:13px">Toprak:</span><button class="chip" style="padding:6px 10px" onclick="$('kal').value=5;hesap()">5 cm</button><button class="chip" style="padding:6px 10px" onclick="$('kal').value=8;hesap()">8 cm</button><button class="chip" style="padding:6px 10px" onclick="$('kal').value=10;hesap()">10 cm</button><button class="chip" style="padding:6px 10px" onclick="$('kal').value=15;hesap()">15 cm</button><button class="chip" style="padding:6px 10px" onclick="$('kal').value=20;hesap()">20 cm</button><b id="m3Not" style="margin-left:auto;font-size:14px;color:var(--acc)"></b></div>
   <p class="mut" id="olcuNot" style="margin:6px 0 0">En ve boyu girersen alan kendiliğinden hesaplanır. Bahçe düzgün değilse sadece m² gir.</p>
   <div style="margin-top:12px"></div>
   <label class="sw">Çim <input type="checkbox" id="cCim" class="tgl" checked></label>
@@ -829,6 +830,7 @@ function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==n
  const ER=elems.map(e=>[e,elHesap(e)]),tarh=ER.filter(([e])=>e.tip==='alan').reduce((a,[,r])=>a+(r.m2||0),0),zem=ER.filter(([e])=>e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),citS=ER.filter(([e])=>e.tip==='cit').reduce((a,[e])=>a+(+e.uz||0)*.5,0),dolu=tarh+zem+citS,cimA=n1(Math.max(0,alan-dolu));
  {const p=[tarh?'çiçek/çalı alanı '+n1(tarh):'',zem?'sert zemin '+n1(zem):'',citS?'çit şeridi '+n1(citS)+' (50 cm)':''].filter(Boolean);$('cimOzet').innerHTML=$('cCim').checked?`🟩 <b>Çim alanı: ${cimA} m²</b>`+(p.length?` <span class="mut">= bahçe ${alan} − ${p.join(' − ')}</span>`:' <span class="mut">(bahçenin tamamı)</span>'):'🟩 Çim yok';}
  const m3=Math.max(0,alan-dolu)*kal/100+Math.min(tarh+citS,alan)*v('gTD')/100;
+ $('m3Not').textContent='= '+n1(m3)+' m³'+(tarh+citS?' (tarhlar dahil)':'');
  const m3A=m3*(1+v('gFT')/100),alanC=cimA*(1+v('gFC')/100);
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3A/tk),kalan=m3A-tir*tk,kucuk=0;
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
