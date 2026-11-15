@@ -211,21 +211,12 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
 </section>
 <section id="p3" class="hide">
  <p class="mut" style="margin:0 4px 10px">Buradakileri <b>bir kere</b> ayarla, her teklif bunlarla hesaplanır. Teklif hazırlarken buraya gelmen gerekmez.</p>
- <div class="card"><h2>💵 Alış fiyatların</h2><p class="mut" style="margin-top:-6px">Senin cebinden çıkan <b>gerçek</b> fiyatlar (tedarikçiye ödediğin). Kârını doğru göstermek için kullanılır. Fidan fiyatları otomatik gelir.</p>
+ <div class="card"><h2>💵 Alış fiyatların</h2><p class="mut" style="margin-top:-6px">Senin cebinden çıkan <b>gerçek</b> maliyetler. Teklif = bunlar + işçilik + genel gider, üstüne kâr oranın. Fidan fiyatları otomatik gelir. Toprak nakliyesi aşağıdaki Nakliye ayarından hesaplanır.</p>
   <div class="grid">
-   <div><label>Toprak (TL/m³)</label><input id="gTop" type="number" inputmode="decimal" value="1000"></div>
-   <div><label>Çim (TL/m²)</label><input id="gCim" type="number" inputmode="decimal" value="120"></div>
-   <div><label>Sulama malzemesi (TL/m²)</label><input id="gSul" type="number" inputmode="decimal" value="200"></div>
+   <div><label>4'lü karışım toprak (TL/m³, nakliye hariç)</label><input id="gTop" type="number" inputmode="decimal" value="1000"></div>
+   <div><label>Rulo çim (TL/m², nakliye dahil, işçilik hariç)</label><input id="gCim" type="number" inputmode="decimal" value="240"></div>
+   <div><label>Otomatik sulama (TL/m², malzeme + işçilik dahil)</label><input id="gSul" type="number" inputmode="decimal" value="267"></div>
    <div><label>Yevmiye (TL/kişi/gün)</label><input id="kYev" type="number" inputmode="decimal" value="1500"></div>
-  </div></div>
- <div class="card"><h2>🏷️ Küçük iş fiyatların</h2><p class="mut" style="margin-top:-6px">Bahçe bu m²'ye kadarsa toprak, çim ve sulama <b>doğrudan bu satış fiyatlarıyla</b> yazılır (kârın içinde). Nakliye m³/m² başına ayrıca eklenir. Kâr oranı sadece bitkilere ve işçiliğe eklenir. Daha büyük işlerde maliyet + kâr hesabı kullanılır.</p>
-  <div class="grid">
-   <div><label>Sınır (m²'ye kadar)</label><input id="sLim" type="number" inputmode="decimal" value="250"></div>
-   <div><label>4'lü karışım toprak (TL/m³, nakliye hariç)</label><input id="sTop" type="number" inputmode="decimal" value="1125"></div>
-   <div><label>Toprak nakliyesi (TL/m³)</label><input id="sTopN" type="number" inputmode="decimal" value="500"></div>
-   <div><label>Rulo çim (TL/m², nakliye hariç)</label><input id="sCim" type="number" inputmode="decimal" value="160"></div>
-   <div><label>Çim nakliyesi (TL/m²)</label><input id="sCimN" type="number" inputmode="decimal" value="25"></div>
-   <div><label>Otomatik sulama (TL/m², malzeme + işçilik dahil)</label><input id="sSul" type="number" inputmode="decimal" value="267"></div>
   </div></div>
  <div class="card"><h2>🚚 Nakliye</h2>
   <div class="grid">
@@ -774,7 +765,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['sLim','sTop','sTopN','sCim','sCimN','sSul','fAB','fAK','fABk','fAKk','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
+const AYAR=['fAB','fAK','fABk','fAKk','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mAbone','mBakim'];
 const EKIS=[['eSok','eski çim/bitki sökümü'],['eMol','moloz atımı'],['eTes','tesviye'],['eDre','drenaj'],['eAyd','bahçe aydınlatması']];
 const ekSecili=()=>EKIS.filter(([i])=>$(i).checked);
@@ -786,9 +777,10 @@ try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
 $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');if(s.sTopN==null&&s.sTop=='1250')s.sTop='1125';AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 $('kBN').value=v('fBN')||10000;
+try{if(!localStorage.getItem('peyzajAlisV2')){$('gCim').value=240;$('gSul').value=267;localStorage.setItem('peyzajAlisV2','1');kaydet()}}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={sLim:250,sTop:1125,sTopN:500,sCim:160,sCimN:25,sSul:267,fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
+const VARS={fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:240,gSul:267,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -835,7 +827,7 @@ function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==n
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
  const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
  const K=true,kO=v('kOran')/100,nak=tir*v('fTN')+kucuk*v('fKN'),r1=x=>Math.round(x*10)/10;
- const KUCUK=alan>0&&alan<=v('sLim');
+ const KUCUK=false;
  kal_.push(['Toprak dolgusu ('+r1(m3)+' m³'+(nTxt||KUCUK?', nakliye dahil':'')+')',0,undefined,m3A*v('gTop')+nak,KUCUK?m3*(v('sTop')+v('sTopN')):null]);
  const ck=+$('cimK').value,cs=CIM[ck];let cimSat=null;
  if($('cCim').checked){kal_.push(['Çim uygulaması',0,cs?cs.firma:undefined,alanC*(cs?cs.fiyat:v('gCim')),KUCUK?cimA*(v('sCim')+v('sCimN')):null]);if(cs)cimSat=cs}
