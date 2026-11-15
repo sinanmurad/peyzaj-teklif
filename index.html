@@ -259,7 +259,6 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>Büyük taçlı ağaç arası (m)</label><input id="fAK" type="number" inputmode="decimal" value="7.5"></div>
    <div><label>Bodur ağaç duvara mesafe (m)</label><input id="fABk" type="number" inputmode="decimal" value="0.5"></div>
    <div><label>Büyük ağaç duvara mesafe (m)</label><input id="fAKk" type="number" inputmode="decimal" value="3"></div>
-   <div><label>Çalı/çiçek alanı toprak derinliği (cm)</label><input id="gTD" type="number" inputmode="decimal" value="30"></div>
   </div>
   <button class="btn sec full" style="margin-top:12px" onclick="sifirla()">Bu sayfadaki sayıları varsayılana döndür</button></div>
  <div class="card"><h2>🏷️ Firma bilgilerin</h2>
@@ -775,7 +774,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['sLim','sTop','sTopN','sCim','sCimN','sSul','fAB','fAK','fABk','fAKk','gTD','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
+const AYAR=['sLim','sTop','sTopN','sCim','sCimN','sSul','fAB','fAK','fABk','fAKk','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mAbone','mBakim'];
 const EKIS=[['eSok','eski çim/bitki sökümü'],['eMol','moloz atımı'],['eTes','tesviye'],['eDre','drenaj'],['eAyd','bahçe aydınlatması']];
 const ekSecili=()=>EKIS.filter(([i])=>$(i).checked);
@@ -789,7 +788,7 @@ try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');if(s.sTopN==nu
 $('kBN').value=v('fBN')||10000;
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={sLim:250,sTop:1125,sTopN:500,sCim:160,sCimN:25,sSul:267,fAB:3,fAK:7.5,fABk:0.5,fAKk:3,gTD:30,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
+const VARS={sLim:250,sTop:1125,sTopN:500,sCim:160,sCimN:25,sSul:267,fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -829,8 +828,8 @@ function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==n
  const kal_=[];
  const ER=elems.map(e=>[e,elHesap(e)]),tarh=ER.filter(([e])=>e.tip==='alan').reduce((a,[,r])=>a+(r.m2||0),0),zem=ER.filter(([e])=>e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),citS=ER.filter(([e])=>e.tip==='cit').reduce((a,[e])=>a+(+e.uz||0)*.5,0),dolu=tarh+zem+citS,cimA=n1(Math.max(0,alan-dolu));
  {const p=[tarh?'çiçek/çalı alanı '+n1(tarh):'',zem?'sert zemin '+n1(zem):'',citS?'çit şeridi '+n1(citS)+' (50 cm)':''].filter(Boolean);$('cimOzet').innerHTML=$('cCim').checked?`🟩 <b>Çim alanı: ${cimA} m²</b>`+(p.length?` <span class="mut">= bahçe ${alan} − ${p.join(' − ')}</span>`:' <span class="mut">(bahçenin tamamı)</span>'):'🟩 Çim yok';}
- const m3=Math.max(0,alan-dolu)*kal/100+Math.min(tarh+citS,alan)*v('gTD')/100;
- $('m3Not').textContent='= '+n1(m3)+' m³'+(tarh+citS?' (tarhlar dahil)':'');
+ const m3=Math.max(0,alan-zem)*kal/100;
+ $('m3Not').textContent='= '+n1(m3)+' m³'+(zem?' (sert zemin hariç)':'');
  const m3A=m3*(1+v('gFT')/100),alanC=cimA*(1+v('gFC')/100);
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3A/tk),kalan=m3A-tir*tk,kucuk=0;
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
