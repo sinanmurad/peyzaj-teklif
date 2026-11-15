@@ -3,7 +3,12 @@ name: Fiyatları güncelle
 on:
   schedule:
     - cron: '17 3 1,11,21 * *'   # Her ayın 1, 11 ve 21'i, 06:17 (TR)
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      sadece:
+        description: 'Sadece bir kaynak (enfidan / diger), boş = hepsi'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -19,6 +24,8 @@ jobs:
           python-version: '3.12'
       - name: Fiyatları çek
         run: python scripts/fiyat_guncelle.py
+        env:
+          SADECE: ${{ github.event.inputs.sadece }}
       - name: Değiştiyse kaydet
         run: |
           git config user.name "fiyat-bot"

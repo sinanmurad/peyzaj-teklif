@@ -7,7 +7,9 @@ import json, re, time, html, datetime, urllib.request, os, sys
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CIKTI = os.path.join(KOK, 'fiyatlar.json')
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36',
-      'Accept-Language': 'tr-TR,tr;q=0.9'}
+      'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
+      'Accept': 'text/html,application/json,application/xhtml+xml,*/*;q=0.8',
+      'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Site': 'none', 'Upgrade-Insecure-Requests': '1'}
 
 def getir(url, tekrar=2):
     for d in range(tekrar):
@@ -65,7 +67,9 @@ def main():
     yeni = {'tarih': datetime.date.today().strftime('%d.%m.%Y'), 'firmalar': {}}
     rapor = []
 
+    sadece = os.environ.get('SADECE', '')
     try:
+        if sadece and sadece != 'enfidan': raise RuntimeError('atlandı')
         print('enfidan.com okunuyor', flush=True)
         e = enfidan(); yeni['firmalar']['enfidan.com'] = e; rapor.append(f'enfidan.com: {len(e)} ürün')
     except Exception as ex:
@@ -73,6 +77,8 @@ def main():
 
     for firma, fn in (('Canlı Bahçe', canli), ('Usta Peyzaj', usta)):
         onceki = eski.get('firmalar', {}).get(firma, {})
+        if sadece and sadece != 'diger':
+            yeni['firmalar'][firma] = onceki; continue
         d, ok, hata, ardisik = {}, 0, 0, 0
         L = [x for x in extra if x['firma'] == firma and x.get('img')]
         print(f'{firma}: {len(L)} ürün okunuyor', flush=True)
