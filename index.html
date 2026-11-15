@@ -826,9 +826,9 @@ function adet(i,val){const x=secili.find(s=>s.i===i);if(x)x.adet=Math.max(1,pars
 function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==null)&&secili.some(s=>agacMi(DATA[s.i]))){bosAgacDoldur();elCiz()}{const en=v('bEn'),boy=v('bBoy');if(en>0&&boy>0){$('alan').value=n1(en*boy);$('alan').readOnly=true;$('olcuNot').textContent=`${en} × ${boy} m = ${$('alan').value} m²`}else{$('alan').readOnly=false;$('olcuNot').textContent='En ve boyu girersen alan kendiliğinden hesaplanır. Bahçe düzgün değilse sadece m² gir.'}}
  const alan=v('alan'),kal=v('kal');
  const kal_=[];
- const ER=elems.map(e=>[e,elHesap(e)]),tarh=ER.filter(([e])=>e.tip==='alan').reduce((a,[,r])=>a+(r.m2||0),0),zem=ER.filter(([e])=>e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),citS=ER.filter(([e])=>e.tip==='cit').reduce((a,[e])=>a+(+e.uz||0)*.5,0),dolu=tarh+zem+citS,cimA=n1(Math.max(0,alan-dolu));
- {const p=[tarh?'çiçek/çalı alanı '+n1(tarh):'',zem?'sert zemin '+n1(zem):'',citS?'çit şeridi '+n1(citS)+' (50 cm)':''].filter(Boolean);$('cimOzet').innerHTML=$('cCim').checked?`🟩 <b>Çim alanı: ${cimA} m²</b>`+(p.length?` <span class="mut">= bahçe ${alan} − ${p.join(' − ')}</span>`:' <span class="mut">(bahçenin tamamı)</span>'):'🟩 Çim yok';}
- const m3=Math.max(0,alan-zem)*kal/100;
+ const ER=elems.map(e=>[e,elHesap(e)]),tarh=ER.filter(([e])=>e.tip==='alan').reduce((a,[,r])=>a+(r.m2||0),0),zem=ER.filter(([e])=>e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),citS=ER.filter(([e])=>e.tip==='cit').reduce((a,[e])=>a+(+e.uz||0)*.5,0),agCanak=ER.filter(([e])=>e.tip==='agac'&&e.bi!=null).reduce((a,[,r])=>a+r.adet,0)+secili.filter(s=>agacMi(DATA[s.i])).reduce((a,s)=>a+s.adet,0),tekCali=secili.filter(s=>!agacMi(DATA[s.i])&&DATA[s.i].tur!=='Sarmaşık').reduce((a,s)=>a+s.adet,0)/(v('pCal')||3),bitS=agCanak*1+tekCali,dolu=tarh+zem+citS+bitS,cimA=n1(Math.max(0,alan-dolu));
+ {const p=[tarh?'çiçek/çalı alanı '+n1(tarh):'',zem?'sert zemin '+n1(zem):'',citS?'çit şeridi '+n1(citS)+' (50 cm)':'',agCanak?'ağaç çanağı '+agCanak+' (1 m²/ağaç)':'',tekCali?'tek çalılar '+n1(tekCali)+' ('+(v('pCal')||3)+'/m²)':''].filter(Boolean);$('cimOzet').innerHTML=$('cCim').checked?`🟩 <b>Çim alanı: ${cimA} m²</b>`+(p.length?` <span class="mut">= bahçe ${alan} − ${p.join(' − ')}</span>`:' <span class="mut">(bahçenin tamamı)</span>'):'🟩 Çim yok';}
+ const m3=Math.max(0,alan-zem)*kal/100;SON_CIM=cimA;
  $('m3Not').textContent='= '+n1(m3)+' m³'+(zem?' (sert zemin hariç)':'');
  const m3A=m3*(1+v('gFT')/100),alanC=cimA*(1+v('gFC')/100);
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3A/tk),kalan=m3A-tir*tk,kucuk=0;
@@ -888,7 +888,7 @@ async function aiFotoSay(f){const tok=await oturumTok();if(!tok){toast('Önce Ka
   aiCiz();$('aiDurum').textContent='✅ '+j.bitkiler.length+' bitki grubu bulundu'+(j.diger&&j.diger.length?' · diğer: '+j.diger.join(', '):'')+'. Adetler tahmini, üstteki alan hesabıyla karşılaştır.'}
  catch(e){$('aiDurum').textContent='⚠️ '+e.message}}
 $('aiFoto').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)aiFotoSay(f)});
-let MOD_KUCUK=false,SON=null,curId=null,KAYIT=[];
+let SON_CIM=null,MOD_KUCUK=false,SON=null,curId=null,KAYIT=[];
 const sbc=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(BP_URL,BP_ANON,{auth:{persistSession:true,storageKey:'peyzajOturum'}}):null;
 async function oturumTok(){if(!sbc)return null;try{const {data}=await sbc.auth.getSession();return data.session?data.session.access_token:null}catch(e){return null}}
 async function girisYap(){if(!sbc){$('gMsg').textContent='İnternet yok';return}$('gMsg').textContent='…';const {error}=await sbc.auth.signInWithPassword({email:$('gEposta').value.trim(),password:$('gSifre').value});$('gSifre').value='';if(error){$('gMsg').textContent='Giriş olmadı: '+error.message;return}$('gMsg').textContent='';toast('Giriş yapıldı');kayitYukle()}
@@ -989,7 +989,7 @@ function planCiz(){elBilgi()}
 function karCiz(L,top,mal,isG,std,K,gen){const kar=top-mal,y=mal?kar/mal*100:0,c=kar>=0?'pos':'neg',f=x=>'%'+Math.round(x);
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
- $('kNot').textContent=(MOD_KUCUK?'🏷️ Küçük iş: toprak, çim, sulama sabit fiyatlarınla. ':'')+(top?`Satış üzerinden marj: ${f(kar/top*100)}.`:'')+(isG?'':' İşçi gideri girilmedi, kâra kendi emeğin de dahil.');
+ $('kNot').textContent=($('cCim').checked&&SON_CIM!=null?'🟩 Çim alanı '+SON_CIM+' m² · ':'')+(MOD_KUCUK?'🏷️ Küçük iş: toprak, çim, sulama sabit fiyatlarınla. ':'')+(top?`Satış üzerinden marj: ${f(kar/top*100)}.`:'')+(isG?'':' İşçi gideri girilmedi, kâra kendi emeğin de dahil.');
  let u='',kr=false;const sec=secili.length||v('alan')>0;
  if(sec&&!(v('kIsci')*v('kGun'))){u='👷 İşçilik girilmedi, fiyat eksik çıkar. <b>3. adıma git</b>';kr=true}
  else if(eksikEl().length){const L=eksikEl();u='🌱 Bitkisi seçilmemiş: '+L.map(e=>EL_AD[e.tip]+' ('+elHesap(e).adet+' adet)').join(', ')+'. <b>Göster</b>';kr=true}
@@ -1013,7 +1013,7 @@ const bas=s=>s?s.charAt(0).toLocaleUpperCase('tr-TR')+s.slice(1):s;
 function kalemMetni(L,ag,m3,alan){const tek=k=>`• ${bas(k[0]).replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`;
  if(!$('mGrup').checked){const ek=ekSecili().map(e=>e[1]);return L.map(tek).join('\n')+(ek.length?'\n• Ek işler: '+ek.join(', ')+' (fiyata dahil)':'')}
  const nS=L.length-ag.length,S=L.slice(0,nS),B=L.slice(nS),out=[];
- if(S.length){const p=[m3>0?'toprak dolgusu ('+(Math.round(m3*10)/10)+' m³)':''];if($('cCim').checked)p.push('çim');if(S.some(k=>/^Sert zemin/.test(k[0])))p.push('sert zemin');if($('cSul').checked)p.push('otomatik sulama');const q=p.filter(Boolean);
+ if(S.length){const p=[m3>0?'toprak dolgusu ('+(Math.round(m3*10)/10)+' m³)':''];if($('cCim').checked){const cm=(S.find(k=>/^Çim uygulaması/.test(k[0]))||[''])[0].match(/\(([\d.]+) m²\)/);p.push(cm&&+cm[1]!==alan?'çim ('+cm[1]+' m²)':'çim')}if(S.some(k=>/^Sert zemin/.test(k[0])))p.push('sert zemin');if($('cSul').checked)p.push('otomatik sulama');const q=p.filter(Boolean);
   const ad='Zemin hazırlığı, '+(q.length>1?q.slice(0,-1).join(', ')+' ve '+q.slice(-1):q[0]||'')+' ('+alan+' m²)';
   out.push(`• ${ad}: ${tl(S.reduce((a,k)=>a+yuv(k[1]),0))}`)}
  if(B.length){const aS=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
