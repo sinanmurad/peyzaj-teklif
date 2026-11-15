@@ -20,7 +20,7 @@ header{position:sticky;top:0;z-index:20;background:var(--acc);color:#fff;padding
 header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
 header .sub{font-size:12px;opacity:.85;margin-top:2px}
 header .hbtn{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:20px;padding:7px 12px;font-size:14px;font-weight:600}
-main{max-width:640px;margin:0 auto;padding:12px 12px calc(150px + var(--sb))}
+main{max-width:640px;margin:0 auto;padding:12px 12px calc(210px + var(--sb))}
 .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
 .card h2{margin:0 0 12px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
 .step{width:24px;height:24px;border-radius:50%;background:var(--acc);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex:none}
@@ -56,6 +56,7 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
 textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:12px;font:15px/1.45 inherit;font-family:inherit;background:#f8faf7}
 .row{display:flex;gap:8px;align-items:end}.row>*{flex:1}
 .hide{display:none!important}
+.uy{pointer-events:auto;background:#fff4e5;color:#8a4b00;border:1px solid #f3c27a;border-radius:14px;padding:10px 12px;font-size:13.5px;font-weight:600;margin-bottom:8px;box-shadow:0 4px 14px rgba(0,0,0,.08);cursor:pointer}.uy.kirmizi{background:#fdecea;color:#a12a1f;border-color:#f1a39b}.uy b{text-decoration:underline}
 #bar{position:fixed;left:0;right:0;bottom:calc(64px + var(--sb));z-index:25;padding:0 12px 8px;pointer-events:none}
 #bar .in{max-width:640px;margin:0 auto;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 6px 20px rgba(0,0,0,.2);pointer-events:auto}
 #bar .lb{font-size:12px;opacity:.75}#bar .tt{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
@@ -100,6 +101,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  <div class="card"><h2>📩 DM'ye ilk cevap</h2><p class="mut" style="margin-top:-6px">Instagram'dan talep gelince bunu gönder, müşteriyi WhatsApp'a çek.</p><textarea id="dm" style="min-height:150px"></textarea>
   <div style="margin-top:10px"><button class="btn full" style="background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)" onclick="kopya('dm')">Kopyala</button></div></div>
  <div class="card"><h2>👤 Müşteri</h2><label>Müşteri adı (ör. Ahmet Bey)</label><input id="musteri" placeholder="Boş bırakılabilir"></div>
+ <div id="uyari2" class="uy hide" onclick="uyariTik()" style="position:static;margin-bottom:12px"></div>
  <div class="card"><h2>💬 Müşteriye WhatsApp metni</h2>
   <label class="sw" style="border-top:0;padding-top:0">Gruplu teklif (birim fiyat görünmez) <input type="checkbox" id="mGrup" class="tgl"></label><textarea id="wa"></textarea>
   <div style="margin-top:10px"><div class="grid"><button class="btn" onclick="location.href='https://wa.me/?text='+encodeURIComponent($('wa').value)" style="background:#25D366">WhatsApp'ta gönder</button><button class="btn sec" onclick="kopya('wa')">Kopyala</button></div>
@@ -122,7 +124,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <div class="grid kpi"><div><div class="lb">Teklif</div><b id="kTeklif"></b></div><div><div class="lb">Tahmini maliyet</div><b id="kMal"></b></div><div><div class="lb">Net kâr</div><b id="kKar"></b></div><div><div class="lb">Kâr oranı (maliyet üstü)</div><b id="kYuz"></b></div></div>
   <p class="mut" id="kNot" style="margin-bottom:0"></p></div>
  <div class="card"><h2>🎯 Kâr hedefi</h2>
-  <label class="sw">Bu işe özel kâr oranı uygula <input type="checkbox" id="kOn" class="tgl"></label>
+  <label class="sw">Kâr oranı uygula (her teklifte açık başlar) <input type="checkbox" id="kOn" class="tgl" checked></label>
   <div id="kBox"><div style="display:flex;gap:10px;align-items:center;margin-top:6px"><input type="range" id="kRng" min="0" max="200" step="5" value="30" style="flex:1;accent-color:var(--acc)"><input id="kOran" type="number" inputmode="decimal" value="30" style="width:80px"><b>%</b></div>
    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sec" style="flex:1" onclick="kSet(20)">%20</button><button class="btn sec" style="flex:1" onclick="kSet(30)">%30</button><button class="btn sec" style="flex:1" onclick="kSet(50)">%50</button><button class="btn sec" style="flex:1" onclick="kSet(100)">%100</button></div>
    <p class="mut" style="margin-bottom:0">Teklifi bitirince oranı seç: toprak, çim, sulama, bitkiler, nakliye, işçi ve diğer giderler dahil <b>tüm maliyet × (1 + oran)</b> olarak kalemlere orantılı dağıtılır. Teklif ve WhatsApp metni otomatik güncellenir. Kapalıyken standart fiyatlar (çim 190 vb.) geçerli.</p></div></div>
@@ -192,7 +194,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
  </div>
 </section>
 </main>
-<div id="bar"><div class="in"><div><div class="lb">Toplam (KDV hariç)</div><div class="tt" id="altTop">0 TL</div><div class="lb" id="altKar" onclick="tab(5)"></div></div><button class="btn" onclick="tab(4)">Gönder ›</button></div></div>
+<div id="bar"><div id="uyari" class="uy hide" onclick="uyariTik()"></div><div class="in"><div><div class="lb">Toplam (KDV hariç)</div><div class="tt" id="altTop">0 TL</div><div class="lb" id="altKar" onclick="tab(5)"></div></div><button class="btn" onclick="tab(4)">Gönder ›</button></div></div>
 <nav class="tabbar">
  <button id="t1" class="on" onclick="tab(1)"><span class="ic">🧮</span>Teklif</button>
  <button id="t5" onclick="tab(5)"><span class="ic">💰</span>Kâr</button>
@@ -704,7 +706,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,5].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',5:'Kâr'}[n];window.scrollTo(0,0);if(n===2)katalog()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);$('kOn').checked=false;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -761,8 +763,17 @@ function karCiz(L,top,mal,isG,std,K){const kar=top-mal,y=mal?kar/mal*100:0,c=kar
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
  const sK=std-mal;$('kNot').textContent=(K?`Standart fiyatlarla olsaydı: ${tl(std)} → kâr ${tl(Math.round(sK))}${mal?' ('+f(sK/mal*100)+')':''}. `:'')+(top?`Satış üzerinden marj: ${f(kar/top*100)}.`:'')+(isG?'':' İşçi gideri girilmedi, kâra kendi emeğin de dahil.');
  $('kBox').style.opacity=K?1:.45;
+ let u='',kr=false;const sec=secili.length||v('alan')>0;
+ if(sec&&!K){u='⚠️ Kâr oranı KAPALI: standart fiyatlar kullanılıyor, zarar edebilirsin. <b>Açmak için dokun</b>';kr=true}
+ else if(sec&&kar<0){u='⚠️ Bu teklif ZARAR ediyor ('+tl(Math.round(kar))+'). <b>Kâr sekmesine bak</b>';kr=true}
+ else if(sec&&K&&!isG){u='💡 Kâr %'+v('kOran')+' açık · işçi gideri girilmedi. <b>Girmek için dokun</b>'}
+ else if(sec&&K){u='✅ Kâr %'+v('kOran')+' açık · cebine kalan '+tl(Math.round(kar))}
+ ['uyari','uyari2'].forEach(id=>{const e=$(id);e.innerHTML=u;e.classList.toggle('hide',!u);e.classList.toggle('kirmizi',kr)});
  $('kTab').innerHTML='<tr><th>Kalem</th><th class="n">Maliyet</th><th class="n">Teklif</th></tr>'+L.map(k=>`<tr><td>${k[0].replace(/ \(.*$/,'').slice(0,40)}</td><td class="n">${tl(Math.round(k[3]))}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+(isG?`<tr><td>İşçi + diğer</td><td class="n">${tl(Math.round(isG))}</td><td class="n">–</td></tr>`:'')+`<tr class="tot"><td>Toplam</td><td class="n">${tl(Math.round(mal))}</td><td class="n">${tl(top)}</td></tr>`}
-function kSet(x){$('kOran').value=x;$('kRng').value=Math.min(200,x);$('kOn').checked=true;hesap()}
+try{const o=localStorage.getItem('peyzajOran');if(o){$('kOran').value=o;$('kRng').value=Math.min(200,+o)}}catch(e){}
+function oranKaydet(){try{localStorage.setItem('peyzajOran',$('kOran').value)}catch(e){}}
+function uyariTik(){if(!$('kOn').checked){$('kOn').checked=true;hesap();toast('Kâr oranı açıldı')}else tab(5)}
+function kSet(x){$('kOran').value=x;$('kRng').value=Math.min(200,x);$('kOn').checked=true;oranKaydet();hesap()}
 function kalemMetni(L,ag,m3,alan){const tek=k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`;
  if(!$('mGrup').checked)return L.map(tek).join('\n');
  const nS=L.length-ag.length,S=L.slice(0,nS),B=L.slice(nS),out=[];
@@ -786,8 +797,8 @@ CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textCon
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
 ['kIsci','kGun','kDig'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
-$('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;$('kOn').checked=true;hesap()});
-$('kOran').addEventListener('input',()=>{$('kRng').value=Math.min(200,v('kOran'));hesap()});
+$('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;oranKaydet();$('kOn').checked=true;hesap()});
+$('kOran').addEventListener('input',()=>{oranKaydet();$('kRng').value=Math.min(200,v('kOran'));hesap()});
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
 ['kq','kt','kst'].forEach(id=>$(id).addEventListener('input',katalog));$('kst').addEventListener('change',katalog);
 ilet();ekOzet();ara();hesap();
