@@ -188,7 +188,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <textarea id="ekListe" style="min-height:120px;margin-top:10px" placeholder="Çınar 18-20Q ; 3200 ; Ağaç"></textarea>
   <div class="grid" style="margin-top:10px"><button class="btn" onclick="ekle_liste()">Listeyi ekle</button><button class="btn sec" onclick="firmaSil()">Firmayı sil</button></div>
   <p class="mut" id="ekmsg"></p><p class="mut" id="ekOzet"></p>
-  <p class="mut">Fiyatlar 14.11.2026 tarihli: enfidan.com, Canlı Bahçe, Usta Peyzaj (Sakarya), Ege Peyzaj (İzmir). Ayarlar bu cihazda saklanır.</p>
+  <p class="mut">Fiyatlar <span id="fTarih">14.11.2026</span> tarihli, her 10 günde bir otomatik güncellenir: enfidan.com, Canlı Bahçe, Usta Peyzaj (Sakarya), Ege Peyzaj (İzmir). Ayarlar bu cihazda saklanır.</p>
  </div>
 </section>
 </main>
@@ -791,6 +791,10 @@ $('kOran').addEventListener('input',()=>{$('kRng').value=Math.min(200,v('kOran')
 $('q').addEventListener('input',ara);$('qt').addEventListener('change',ara);
 ['kq','kt','kst'].forEach(id=>$(id).addEventListener('input',katalog));$('kst').addEventListener('change',katalog);
 ilet();ekOzet();ara();hesap();
+const FY_URL='https://raw.githubusercontent.com/sinanmurad/peyzaj-teklif/main/fiyatlar.json';
+function fiyatUygula(j){if(!j||!j.firmalar)return 0;let n=0;DATA.forEach(d=>{const F=j.firmalar[d.firma];if(!F)return;const r=F[d.firma==='enfidan.com'?d.ad:d.img];if(r&&r[0]>0){if(d.fiyat!==r[0])n++;d.fiyat=r[0];d.stok=!!r[1]}});if(j.tarih)$('fTarih').textContent=j.tarih;return n}
+try{if(fiyatUygula(JSON.parse(localStorage.getItem('peyzajFiyat')||'null'))){ara();hesap()}}catch(e){}
+fetch(FY_URL+'?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>fetch('fiyatlar.json',{cache:'no-store'}).then(r=>r.json())).then(j=>{const n=fiyatUygula(j);try{localStorage.setItem('peyzajFiyat',JSON.stringify(j))}catch(e){};if(n){ara();hesap();toast(n+' ürünün fiyatı güncellendi ('+j.tarih+')')}}).catch(()=>{});
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
