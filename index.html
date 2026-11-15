@@ -236,7 +236,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
  <div class="card"><h2>🛡️ Gizli kayıplar</h2><p class="mut" style="margin-top:-6px">Müşteri görmez, maliyetine eklenir.</p>
   <div class="grid">
    <div><label>Toprak fire (%)</label><input id="gFT" type="number" inputmode="decimal" value="10"></div>
-   <div><label>Çim fire (%)</label><input id="gFC" type="number" inputmode="decimal" value="5"></div>
+   <div><label>Çim fire (%)</label><input id="gFC" type="number" inputmode="decimal" value="10"></div>
    <div><label>Genel gider (%)</label><input id="gGen" type="number" inputmode="decimal" value="10"></div>
   </div>
   <p class="mut" style="margin-bottom:0"><b>Fire:</b> toprak sıkışır, çim kenarlarda kesilir, fazlası alınır.<br><b>Genel gider:</b> araç, alet, telefon, reklam. Aylık bu masraflarını aylık cirona böl, çıkan yüzde bu sayıdır.</p></div>
@@ -777,10 +777,11 @@ try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
 $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');if(s.sTopN==null&&s.sTop=='1250')s.sTop='1125';AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 $('kBN').value=v('fBN')||10000;
+try{if(!localStorage.getItem('peyzajFireV1')){if(v('gFC')<10){$('gFC').value=10;kaydet()}localStorage.setItem('peyzajFireV1','1')}}catch(e){}
 try{if(!localStorage.getItem('peyzajAlisV2')){$('gCim').value=240;$('gSul').value=267;localStorage.setItem('peyzajAlisV2','1');kaydet()}}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:240,gSul:267,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
+const VARS={fAB:3,fAK:7.5,fABk:0.5,fAKk:3,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:240,gSul:267,kYev:1500,gFT:10,gFC:10,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
