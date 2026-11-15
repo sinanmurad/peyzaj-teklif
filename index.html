@@ -144,6 +144,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>İşçi sayısı</label><input id="kIsci" type="number" inputmode="numeric" value="0"></div>
    <div><label>Gün</label><input id="kGun" type="number" inputmode="decimal" value="0"></div>
   </div>
+  <div style="margin-top:10px"><label>Bitki nakliyesi bu iş için (TL, bitki yoksa sayılmaz)</label><input id="kBN" type="number" inputmode="decimal" value="10000"></div>
   <div style="margin-top:10px"><label>Yakıt, yemek, gübre gibi masraflar (TL)</label><input id="kDig" type="number" inputmode="decimal" value="0"></div>
   <div style="margin-top:12px;font-weight:700">Bu bahçede ek iş var mı?</div>
   <p class="mut" style="margin:2px 0 4px">Varsa işaretle, maliyetini yaz. Fiyata eklenir, teklifte "dahil" olarak yazılır.</p>
@@ -216,12 +217,14 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>Sulama malzemesi (TL/m²)</label><input id="gSul" type="number" inputmode="decimal" value="200"></div>
    <div><label>Yevmiye (TL/kişi/gün)</label><input id="kYev" type="number" inputmode="decimal" value="1500"></div>
   </div></div>
- <div class="card"><h2>🏷️ Küçük iş fiyatların</h2><p class="mut" style="margin-top:-6px">Bahçe bu m²'ye kadarsa toprak, çim ve sulama <b>doğrudan bu satış fiyatlarıyla</b> yazılır (kârın içinde, nakliye dahil). Kâr oranı sadece bitkilere ve işçiliğe eklenir. Daha büyük işlerde maliyet + kâr hesabı kullanılır.</p>
+ <div class="card"><h2>🏷️ Küçük iş fiyatların</h2><p class="mut" style="margin-top:-6px">Bahçe bu m²'ye kadarsa toprak, çim ve sulama <b>doğrudan bu satış fiyatlarıyla</b> yazılır (kârın içinde). Nakliye m³/m² başına ayrıca eklenir. Kâr oranı sadece bitkilere ve işçiliğe eklenir. Daha büyük işlerde maliyet + kâr hesabı kullanılır.</p>
   <div class="grid">
    <div><label>Sınır (m²'ye kadar)</label><input id="sLim" type="number" inputmode="decimal" value="250"></div>
-   <div><label>Toprak (TL/m³, nakliye dahil)</label><input id="sTop" type="number" inputmode="decimal" value="1250"></div>
-   <div><label>Çim (TL/m²)</label><input id="sCim" type="number" inputmode="decimal" value="160"></div>
-   <div><label>Otomatik sulama (TL/m²)</label><input id="sSul" type="number" inputmode="decimal" value="267"></div>
+   <div><label>4'lü karışım toprak (TL/m³, nakliye hariç)</label><input id="sTop" type="number" inputmode="decimal" value="1125"></div>
+   <div><label>Toprak nakliyesi (TL/m³)</label><input id="sTopN" type="number" inputmode="decimal" value="500"></div>
+   <div><label>Rulo çim (TL/m², nakliye hariç)</label><input id="sCim" type="number" inputmode="decimal" value="160"></div>
+   <div><label>Çim nakliyesi (TL/m²)</label><input id="sCimN" type="number" inputmode="decimal" value="25"></div>
+   <div><label>Otomatik sulama (TL/m², malzeme + işçilik dahil)</label><input id="sSul" type="number" inputmode="decimal" value="267"></div>
   </div></div>
  <div class="card"><h2>🚚 Nakliye</h2>
   <div class="grid">
@@ -229,7 +232,7 @@ body.kbd #bar,body.kbd .tabbar{display:none!important}body.kbd main{padding-bott
    <div><label>Küçük araç sınırı (m³)</label><input id="fKK" type="number" inputmode="decimal" value="10"></div>
    <div><label>Tır (TL/sefer)</label><input id="fTN" type="number" inputmode="decimal" value="19000"></div>
    <div><label>Tır kapasitesi (m³)</label><input id="fTK" type="number" inputmode="decimal" value="22"></div>
-   <div><label>Bitki nakliyesi (TL/iş)</label><input id="fBN" type="number" inputmode="decimal" value="10000"></div>
+   <div><label>Bitki nakliyesi varsayılanı (TL/iş)</label><input id="fBN" type="number" inputmode="decimal" value="10000"></div>
   </div></div>
  <div class="card"><h2>🪨 Sert zemin alış (TL/m²)</h2><p class="mut" style="margin-top:-6px">Malzeme + serim, senin maliyetin. Kendi fiyatlarını gir.</p>
   <div class="grid">
@@ -771,7 +774,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['sLim','sTop','sCim','sSul','fAB','fAK','fABk','fAKk','gTD','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
+const AYAR=['sLim','sTop','sTopN','sCim','sCimN','sSul','fAB','fAK','fABk','fAKk','gTD','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mAbone','mBakim'];
 const EKIS=[['eSok','eski çim/bitki sökümü'],['eMol','moloz atımı'],['eTes','tesviye'],['eDre','drenaj'],['eAyd','bahçe aydınlatması']];
 const ekSecili=()=>EKIS.filter(([i])=>$(i).checked);
@@ -781,10 +784,11 @@ try{$('mGrup').checked=localStorage.getItem('peyzajGrup')!=='0'}catch(e){}
 $('mGrup').addEventListener('change',()=>{try{localStorage.setItem('peyzajGrup',$('mGrup').checked?'1':'0')}catch(e){};hesap()});
 try{$('mWa').checked=localStorage.getItem('peyzajWa')==='1'}catch(e){}
 $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('mWa').checked?'1':'0')}catch(e){};hesap()});
-try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');if(s.sTopN==null&&s.sTop=='1250')s.sTop='1125';AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
+$('kBN').value=v('fBN')||10000;
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={sLim:250,sTop:1250,sCim:160,sSul:267,fAB:3,fAK:7.5,fABk:0.5,fAKk:3,gTD:30,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
+const VARS={sLim:250,sTop:1125,sTopN:500,sCim:160,sCimN:25,sSul:267,fAB:3,fAK:7.5,fABk:0.5,fAKk:3,gTD:30,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:10,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -802,7 +806,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,6].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',6:'Kayıtlar'}[n];window.scrollTo(0,0);if(n===2)katalog();if(n===6)kayitYukle()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){adimGit(1);secili=[];elems=[];elAcik=null;$('elModal').classList.add('hide');elCiz();['bEn','bBoy'].forEach(k=>$(k).value='');['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);EKIS.forEach(([i])=>{$(i).checked=false;$(i+'T').value='';$(i+'T').classList.add('hide')});$('aiMetin').value='';aiSat=[];aiCiz();curId=null;['kmTel','kmIlce','musteri'].forEach(k=>$(k).value='');$('kmDurum').value='gonderildi';$('kmMsg').textContent='';$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){adimGit(1);secili=[];elems=[];elAcik=null;$('elModal').classList.add('hide');elCiz();['bEn','bBoy'].forEach(k=>$(k).value='');['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);$('kBN').value=v('fBN');EKIS.forEach(([i])=>{$(i).checked=false;$(i+'T').value='';$(i+'T').classList.add('hide')});$('aiMetin').value='';aiSat=[];aiCiz();curId=null;['kmTel','kmIlce','musteri'].forEach(k=>$(k).value='');$('kmDurum').value='gonderildi';$('kmMsg').textContent='';$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -831,13 +835,13 @@ function hesap(seciliCiz=true){kaydet();if(elems.some(e=>e.tip==='agac'&&e.bi==n
  const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
  const K=true,kO=v('kOran')/100,nak=tir*v('fTN')+kucuk*v('fKN'),r1=x=>Math.round(x*10)/10;
  const KUCUK=alan>0&&alan<=v('sLim');
- kal_.push(['Toprak dolgusu ('+r1(m3)+' m³'+(nTxt||KUCUK?', nakliye dahil':'')+')',0,undefined,m3A*v('gTop')+nak,KUCUK?m3*v('sTop'):null]);
+ kal_.push(['Toprak dolgusu ('+r1(m3)+' m³'+(nTxt||KUCUK?', nakliye dahil':'')+')',0,undefined,m3A*v('gTop')+nak,KUCUK?m3*(v('sTop')+v('sTopN')):null]);
  const ck=+$('cimK').value,cs=CIM[ck];let cimSat=null;
- if($('cCim').checked){kal_.push(['Çim uygulaması ('+cimA+' m²)',0,cs?cs.firma:undefined,alanC*(cs?cs.fiyat:v('gCim')),KUCUK?cimA*v('sCim'):null]);if(cs)cimSat=cs}
+ if($('cCim').checked){kal_.push(['Çim uygulaması ('+cimA+' m²)',0,cs?cs.firma:undefined,alanC*(cs?cs.fiyat:v('gCim')),KUCUK?cimA*(v('sCim')+v('sCimN')):null]);if(cs)cimSat=cs}
  if($('cSul').checked)kal_.push(['Otomatik sulama sistemi ('+alan+' m²)',0,undefined,alan*v('gSul'),KUCUK?alan*v('sSul'):null]);
  ER.filter(([e,r])=>e.tip==='zemin'&&r.m2>0).forEach(([e,r])=>kal_.push(['Sert zemin: '+ZEM[e.tur][0].toLocaleLowerCase('tr-TR')+' ('+n1(r.m2)+' m²)',0,undefined,r.mal]));
  const ag=[...secili,...planAg()].map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac,buyuk:s.buyuk??buyukMu(DATA[s.i])}));
- const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('fBN'):0;
+ const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('kBN'):0;
  ag.forEach(d=>{const pn=bAlis?bN*d.fiyat*d.adet/bAlis:0;kal_.push([d.ad+' × '+d.adet,0,d.firma,d.adet*d.fiyat+pn])});
  const isG=v('kIsci')*v('kGun')*v('kYev')+v('kDig')+ekToplam(),malK=kal_.reduce((a,k)=>a+k[3],0),gen=(malK+isG)*v('gGen')/100,malT=malK+isG+gen;
  const stdT=0;
@@ -899,7 +903,7 @@ async function teklifKaydet(){const tok=await oturumTok();if(!tok){toast('Önce 
   if(mid){const r=await sbc.from('tk_musteriler').update(mus).eq('id',mid);if(r.error)throw r.error}
   else{const r=await sbc.from('tk_musteriler').insert(mus).select('id').single();if(r.error)throw r.error;mid=r.data.id}
   const ag=secili.map(s=>({ad:DATA[s.i].ad,firma:DATA[s.i].firma,adet:s.adet,agac:s.agac,buyuk:!!s.buyuk,alis:DATA[s.i].fiyat}));
-  const dv={elems:elKayit()};['bEn','bBoy','alan','kal','kOran','kIsci','kGun','kYev','kDig',...EKIS.map(e=>e[0]+'T')].forEach(k=>dv[k]=$(k).value);['cCim','cSul','kOn','mGrup',...EKIS.map(e=>e[0])].forEach(k=>dv[k]=$(k).checked);
+  const dv={elems:elKayit()};['bEn','bBoy','alan','kal','kOran','kIsci','kGun','kYev','kDig','kBN',...EKIS.map(e=>e[0]+'T')].forEach(k=>dv[k]=$(k).value);['cCim','cSul','kOn','mGrup',...EKIS.map(e=>e[0])].forEach(k=>dv[k]=$(k).checked);
   const t={musteri_id:mid,durum:$('kmDurum').value,alan:v('alan'),toprak_cm:v('kal'),cim:$('cCim').checked,sulama:$('cSul').checked,kar_orani:SON.K?v('kOran'):null,toplam:SON.toplam,maliyet:SON.mal,kar:SON.toplam-SON.mal,isci_gider:SON.isG,kalemler:SON.kal,bitkiler:ag,durum_verisi:dv,wa_metni:$('wa').value};
   const r=curId?await sbc.from('tk_teklifler').update(t).eq('id',curId).select('id').single():await sbc.from('tk_teklifler').insert(t).select('id').single();if(r.error)throw r.error;
   const yeniMi=!curId;curId=r.data.id;$('kmMsg').textContent=yeniMi?'✅ Kaydedildi':'✅ Güncellendi';toast(yeniMi?'Teklif kaydedildi':'Teklif güncellendi')}
@@ -1060,7 +1064,7 @@ let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csv
 CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.ad+' – '+c.fiyat+' TL/m²';$('cimK').appendChild(o)});
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
-['kIsci','kGun','kDig','bEn','bBoy'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+['kIsci','kGun','kDig','kBN','bEn','bBoy'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 $('aiMetin').addEventListener('input',aiCoz);
 $('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;oranKaydet();$('kOn').checked=true;hesap()});
 $('kOran').addEventListener('input',()=>{oranKaydet();$('kRng').value=Math.min(200,v('kOran'));hesap()});
