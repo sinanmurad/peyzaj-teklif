@@ -79,31 +79,33 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
 <section id="p1">
  <div class="card"><h2><span class="step">1</span>Bahçe</h2>
   <div class="grid">
+   <div><label>En (m)</label><input id="bEn" type="number" inputmode="decimal" placeholder="ör. 5"></div>
+   <div><label>Boy (m)</label><input id="bBoy" type="number" inputmode="decimal" placeholder="ör. 8"></div>
    <div><label>Alan (m²)</label><input id="alan" type="number" inputmode="decimal" value="150"></div>
    <div><label>Toprak kalınlığı (cm)</label><input id="kal" type="number" inputmode="decimal" value="13"></div>
   </div>
+  <p class="mut" id="olcuNot" style="margin:6px 0 0">En ve boyu girersen alan kendiliğinden hesaplanır. Bahçe düzgün değilse sadece m² gir.</p>
   <div style="margin-top:12px"></div>
   <label class="sw">Çim <input type="checkbox" id="cCim" class="tgl" checked></label>
   <div id="cimBox" style="padding-bottom:10px"><label>Çimi hangi firmadan alacaksın? (seçmezsen Ayarlar'daki çim alış fiyatın kullanılır)</label><select id="cimK"><option value="-1">Seçilmedi</option></select></div>
   <label class="sw">Otomatik sulama <input type="checkbox" id="cSul" class="tgl" checked></label>
  </div>
- <div class="card"><h2><span class="step">2</span>Bitkiler</h2>
+ <div class="card"><h2><span class="step">2</span>Bahçe planı</h2>
+  <p class="mut" style="margin-top:-6px">Bahçede ne olacaksa ekle, ölçüsünü yaz: adedi sistem hesaplar, sen bitkiyi seçersin.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+   <button class="btn sec" onclick="elEkle('agac')">＋ 🌳 Ağaç</button><button class="btn sec" onclick="elEkle('cit')">＋ 🌲 Çit / duvar dibi</button>
+   <button class="btn sec" onclick="elEkle('alan')">＋ 🌿 Çalı / çiçek alanı</button><button class="btn sec" onclick="elEkle('sar')">＋ 🍃 Sarmaşık</button>
+   <button class="btn sec" onclick="elEkle('zemin')" style="grid-column:1/3">＋ 🪨 Sert zemin (yol, taş, deck)</button>
+  </div>
+  <div id="elemler"></div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-weight:700">Plan dışı bitki ekle (katalogdan)</div>
   <div class="search"><input id="q" type="search" placeholder="Ara: çınar, zeytin, 20-25Q…" autocomplete="off"></div>
   <select id="qt" class="hide"><option value="">Hepsi</option></select>
   <div class="chips" id="chips"></div>
   <div id="res" class="res hide"></div>
   <div id="sel" style="margin-top:6px"></div>
   <div id="agWarn" class="warn"></div>
-  <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><details id="planD"><summary style="font-weight:700;font-size:16px;cursor:pointer">📐 Yardımcı: kaç bitki gerekir? · 📷 görselden say</summary>
-  <p class="mut" style="margin:8px 0">Konseptte/fotoğrafta gördüğün alanları kabaca gir, gereken bitki sayısını hesaplasın. Teklifteki sayıyla karşılaştırır.</p>
-  <div class="grid">
-   <div><label>🌲 Çit uzunluğu (metre)</label><input id="zCit" type="number" inputmode="decimal" value="0"></div>
-   <div><label>🌿 Çalı tarhı (m²)</label><input id="zCal" type="number" inputmode="decimal" value="0"></div>
-   <div><label>🍀 Bodur / yer örtücü (m²)</label><input id="zBod" type="number" inputmode="decimal" value="0"></div>
-   <div><label>🌸 Mevsimlik çiçek (m²)</label><input id="zCic" type="number" inputmode="decimal" value="0"></div>
-  </div>
-  <div id="planOut" style="margin-top:10px;font-size:14.5px;line-height:1.6"></div>
-  <div style="margin-top:16px;font-weight:700">🤖 Görselden bitki say</div>
+  <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><details id="planD"><summary style="font-weight:700;font-size:16px;cursor:pointer">📷 Görselden bitki say (AI)</summary>
   <p class="mut" style="margin:4px 0 8px">Konsept görselini ya da bahçe fotoğrafını seç: AI bitkileri ve yaklaşık adetlerini sayar, katalogda bulup önerir. İstersen Telegram'daki "AI'nın görselde gördüğü" satırını da aşağıya yapıştırabilirsin.</p>
   <label class="btn full" style="display:flex;justify-content:center;cursor:pointer">📷 Görsel seç ve say<input type="file" id="aiFoto" accept="image/*" style="display:none"></label>
   <div id="aiDurum" class="mut" style="margin:6px 0"></div>
@@ -193,6 +195,13 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
    <div><label>Tır kapasitesi (m³)</label><input id="fTK" type="number" inputmode="decimal" value="22"></div>
    <div><label>Bitki nakliyesi (TL/iş)</label><input id="fBN" type="number" inputmode="decimal" value="10000"></div>
   </div></div>
+ <div class="card"><h2>🪨 Sert zemin alış (TL/m²)</h2><p class="mut" style="margin-top:-6px">Malzeme + serim, senin maliyetin. Kendi fiyatlarını gir.</p>
+  <div class="grid">
+   <div><label>Çakıl</label><input id="zgCak" type="number" inputmode="decimal" value="250"></div>
+   <div><label>Doğal taş / basamak</label><input id="zgTas" type="number" inputmode="decimal" value="1200"></div>
+   <div><label>Ahşap deck</label><input id="zgDek" type="number" inputmode="decimal" value="2000"></div>
+   <div><label>Karo / kilit taşı</label><input id="zgKar" type="number" inputmode="decimal" value="800"></div>
+  </div></div>
  <div class="card"><h2>🛡️ Gizli kayıplar</h2><p class="mut" style="margin-top:-6px">Müşteri görmez, maliyetine eklenir.</p>
   <div class="grid">
    <div><label>Toprak fire (%)</label><input id="gFT" type="number" inputmode="decimal" value="15"></div>
@@ -202,7 +211,7 @@ textarea{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);b
   <p class="mut" style="margin-bottom:0"><b>Fire:</b> toprak sıkışır, çim kenarlarda kesilir, fazlası alınır.<br><b>Genel gider:</b> araç, alet, telefon, reklam. Aylık bu masraflarını aylık cirona böl, çıkan yüzde bu sayıdır.</p></div>
  <div class="card"><h2>🌱 Dikim kuralları</h2>
   <div class="grid">
-   <div><label>Çit (adet/metre)</label><input id="pCit" type="number" inputmode="decimal" value="2"></div>
+   <div><label>Sarmaşık arası (m)</label><input id="pSar" type="number" inputmode="decimal" value="1"></div>
    <div><label>Çalı tarhı (adet/m²)</label><input id="pCal" type="number" inputmode="decimal" value="3"></div>
    <div><label>Bodur / yer örtücü (adet/m²)</label><input id="pBod" type="number" inputmode="decimal" value="6"></div>
    <div><label>Mevsimlik çiçek (adet/m²)</label><input id="pCic" type="number" inputmode="decimal" value="16"></div>
@@ -721,7 +730,7 @@ let secili=[];
 TURLER.forEach(t=>{['qt','kt'].forEach(s=>{const o=document.createElement('option');o.value=o.textContent=t;$(s).appendChild(o)})});
 ['','Ağaç','İbreli','Çalı','Palmiye','Sarmaşık','Çim-Saz'].forEach(t=>{const b=document.createElement('button');b.className='chip'+(t===''?' on':'');b.textContent=t||'Hepsi';b.onclick=()=>{$('qt').value=t;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));ara()};$('chips').appendChild(b)});
 
-const AYAR=['fAB','fAK','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pCit','pCal','pBod','pCic'];
+const AYAR=['fAB','fAK','fTN','fTK','fKN','fKK','fBN','gTop','gCim','gSul','kYev','gFT','gFC','gGen','pSar','pCal','pBod','pCic','zgCak','zgTas','zgDek','zgKar'];
 const METIN=['mFirma','mAd2','mTel','mIg','mGun','mOde','mAbone','mBakim'];
 const EKIS=[['eSok','eski çim/bitki sökümü'],['eMol','moloz atımı'],['eTes','tesviye'],['eDre','drenaj'],['eAyd','bahçe aydınlatması']];
 const ekSecili=()=>EKIS.filter(([i])=>$(i).checked);
@@ -734,7 +743,7 @@ $('mWa').addEventListener('change',()=>{try{localStorage.setItem('peyzajWa',$('m
 try{const s=JSON.parse(localStorage.getItem('peyzajAyar7')||'{}');AYAR.forEach(k=>{if(s[k]!=null)$(k).value=s[k]})}catch(e){}
 try{const s=JSON.parse(localStorage.getItem('peyzajFirma')||'{}');METIN.forEach(k=>{if(s[k]!=null)$(k).value=s[k]});if(!$('mTel').value.trim())$('mTel').value='0532 332 49 34';if($('mOde').value==='%50 başlangıçta, %50 teslimde')$('mOde').value='%40 başlangıçta, %60 iş bitiminde'}catch(e){}
 function kaydet(){try{const s={};AYAR.forEach(k=>s[k]=$(k).value);localStorage.setItem('peyzajAyar7',JSON.stringify(s));const f={};METIN.forEach(k=>f[k]=$(k).value);localStorage.setItem('peyzajFirma',JSON.stringify(f))}catch(e){}}
-const VARS={fAB:3,fAK:7.5,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:15,gFC:5,gGen:10,pCit:2,pCal:3,pBod:6,pCic:16};
+const VARS={fAB:3,fAK:7.5,fTN:19000,fTK:22,fKN:9000,fKK:10,fBN:10000,gTop:1000,gCim:120,gSul:200,kYev:1500,gFT:15,gFC:5,gGen:10,pSar:1,pCal:3,pBod:6,pCic:16,zgCak:250,zgTas:1200,zgDek:2000,zgKar:800};
 function ekOzet(){const c={};DATA.forEach(d=>c[d.firma]=(c[d.firma]||0)+1);$('ekOzet').textContent='Yüklü firmalar: '+Object.entries(c).map(([f,n])=>f+' ('+n+')').join(', ')}
 function ekKaydet(L){try{localStorage.setItem('peyzajEk',JSON.stringify(L))}catch(e){}}
 function ekOku(){try{return JSON.parse(localStorage.getItem('peyzajEk')||'[]')}catch(e){return[]}}
@@ -752,7 +761,7 @@ function sifirla(){AYAR.forEach(k=>$(k).value=VARS[k]);hesap()}
 function v(id){return parseFloat($(id).value)||0}
 function tab(n){[1,2,3,4,6].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).classList.toggle('on',i===n)});$('bar').classList.toggle('hide',n!==1);$('hT').textContent={1:'Yeni Teklif',2:'Katalog',3:'Ayarlar',4:'Gönder',6:'Kayıtlar'}[n];window.scrollTo(0,0);if(n===2)katalog();if(n===6)kayitYukle()}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1400)}
-function yeni(){secili=[];['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(k=>$(k).value=0);EKIS.forEach(([i])=>{$(i).checked=false;$(i+'T').value='';$(i+'T').classList.add('hide')});$('aiMetin').value='';aiSat=[];aiCiz();curId=null;['kmTel','kmIlce','musteri'].forEach(k=>$(k).value='');$('kmDurum').value='gonderildi';$('kmMsg').textContent='';$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
+function yeni(){secili=[];elems=[];elCiz();['bEn','bBoy'].forEach(k=>$(k).value='');['kIsci','kGun','kDig'].forEach(k=>$(k).value=0);EKIS.forEach(([i])=>{$(i).checked=false;$(i+'T').value='';$(i+'T').classList.add('hide')});$('aiMetin').value='';aiSat=[];aiCiz();curId=null;['kmTel','kmIlce','musteri'].forEach(k=>$(k).value='');$('kmDurum').value='gonderildi';$('kmMsg').textContent='';$('aiDurum').textContent='';$('kOn').checked=true;$('q').value='';ara();tab(1);hesap();toast('Yeni teklif')}
 function artir(i,d){const x=secili.find(s=>s.i===i);if(!x)return;x.adet=Math.max(1,x.adet+d);hesap()}
 function norm(s){return s.toLocaleLowerCase('tr-TR')}
 function ara(){const q=norm($('q').value.trim()),t=$('qt').value;const r=$('res');
@@ -769,20 +778,22 @@ function ekle(i){const x=secili.find(s=>s.i===i);if(x)x.adet++;else secili.push(
 function tip(i){const x=secili.find(s=>s.i===i);if(x)x.agac=!x.agac;hesap()}
 function sil(i){secili=secili.filter(s=>s.i!==i);hesap()}
 function adet(i,val){const x=secili.find(s=>s.i===i);if(x)x.adet=Math.max(1,parseInt(val)||1);hesap(false)}
-function hesap(seciliCiz=true){kaydet();
+function hesap(seciliCiz=true){kaydet();{const en=v('bEn'),boy=v('bBoy');if(en>0&&boy>0){$('alan').value=n1(en*boy);$('alan').readOnly=true;$('olcuNot').textContent=`${en} × ${boy} m = ${$('alan').value} m²`}else{$('alan').readOnly=false;$('olcuNot').textContent='En ve boyu girersen alan kendiliğinden hesaplanır. Bahçe düzgün değilse sadece m² gir.'}}
  const alan=v('alan'),kal=v('kal');
  const m3=alan*kal/100;
  const kal_=[];
- const m3A=m3*(1+v('gFT')/100),alanC=alan*(1+v('gFC')/100);
+ const ER=elems.map(e=>[e,elHesap(e)]),dolu=ER.filter(([e])=>e.tip==='alan'||e.tip==='zemin').reduce((a,[,r])=>a+(r.m2||0),0),cimA=n1(Math.max(0,alan-dolu));
+ const m3A=m3*(1+v('gFT')/100),alanC=cimA*(1+v('gFC')/100);
  const tk=v('fTK')||22,kk=v('fKK')||10;let tir=Math.floor(m3A/tk),kalan=m3A-tir*tk,kucuk=0;
  if(kalan>kk)tir++;else if(kalan>0)kucuk=1;
  const nTxt=[tir?tir+' tır':'',kucuk?kucuk+' küçük araç':''].filter(Boolean).join(' + ');
  const K=true,kO=v('kOran')/100,nak=tir*v('fTN')+kucuk*v('fKN'),r1=x=>Math.round(x*10)/10;
  kal_.push(['Toprak dolgusu ('+r1(m3)+' m³'+(nTxt?', nakliye dahil':'')+')',0,undefined,m3A*v('gTop')+nak]);
  const ck=+$('cimK').value,cs=CIM[ck];let cimSat=null;
- if($('cCim').checked){kal_.push(['Çim uygulaması ('+alan+' m²)',0,cs?cs.firma:undefined,alanC*(cs?cs.fiyat:v('gCim'))]);if(cs)cimSat=cs}
+ if($('cCim').checked){kal_.push(['Çim uygulaması ('+cimA+' m²)',0,cs?cs.firma:undefined,alanC*(cs?cs.fiyat:v('gCim'))]);if(cs)cimSat=cs}
  if($('cSul').checked)kal_.push(['Otomatik sulama sistemi ('+alan+' m²)',0,undefined,alan*v('gSul')]);
- const ag=secili.map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac,buyuk:s.buyuk??buyukMu(DATA[s.i])}));
+ ER.filter(([e,r])=>e.tip==='zemin'&&r.m2>0).forEach(([e,r])=>kal_.push(['Sert zemin: '+ZEM[e.tur][0].toLocaleLowerCase('tr-TR')+' ('+n1(r.m2)+' m²)',0,undefined,r.mal]));
+ const ag=[...secili,...planAg()].map(s=>({...DATA[s.i],adet:s.adet,agac:s.agac,buyuk:s.buyuk??buyukMu(DATA[s.i])}));
  const bAlis=ag.reduce((a,d)=>a+d.fiyat*d.adet,0),bN=ag.length?v('fBN'):0;
  ag.forEach(d=>{const pn=bAlis?bN*d.fiyat*d.adet/bAlis:0;kal_.push([d.ad+' × '+d.adet,0,d.firma,d.adet*d.fiyat+pn])});
  const isG=v('kIsci')*v('kGun')*v('kYev')+v('kDig')+ekToplam(),malK=kal_.reduce((a,k)=>a+k[3],0),gen=(malK+isG)*v('gGen')/100,malT=malK+isG+gen;
@@ -792,10 +803,11 @@ function hesap(seciliCiz=true){kaydet();
  const agSay=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0);
  const aB=Math.pow(v('fAB')||3,2),aK=Math.pow(v('fAK')||7.5,2),gerek=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet*(d.buyuk?aK:aB),0),lim=Math.floor(alan/aB);
  $('agWarn').textContent=!agSay?'':gerek>alan?`⚠️ Seçtiğin ${agSay} ağaç için ~${Math.round(gerek)} m² gerekir, bahçe ${alan} m². Ağaçlar sıkışır, azalt ya da bodur seç.`:`Ağaçlar ~${Math.round(gerek)} m² kaplar, bahçe ${alan} m² ✓`;
- planCiz(ag,alan,lim,agSay);
+ planCiz();
  const tukendi=ag.filter(d=>!d.stok);
  const sus=AYAR.filter(k=>VARS[k]&&(v(k)>VARS[k]*5||v(k)<VARS[k]/5)).map(k=>$(k).parentNode.querySelector('label').textContent);
- if(seciliCiz)$('sel').innerHTML=ag.length?ag.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a>${d.agac?` · <a href="#" onclick="tac(${d.i});return false" style="color:var(--acc)">${d.buyuk?'büyük taç ('+v('fAK')+' m ara)':'bodur ('+v('fAB')+' m ara)'}</a>`:''}</div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
+ const agM=ag.slice(0,secili.length);
+ if(seciliCiz)$('sel').innerHTML=agM.length?agM.map(d=>`<div class="selrow">${foto(d)}<div class="nm">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<div class="mut">${tl(d.fiyat)} alış ${fTag(d)} · <a href="#" onclick="tip(${d.i});return false" style="color:var(--acc)">${d.agac?'ağaç':'çalı'}</a>${d.agac?` · <a href="#" onclick="tac(${d.i});return false" style="color:var(--acc)">${d.buyuk?'büyük taç ('+v('fAK')+' m ara)':'bodur ('+v('fAB')+' m ara)'}</a>`:''}</div></div><div class="stp"><button onclick="artir(${d.i},-1)">−</button><input type="number" inputmode="numeric" min="1" value="${d.adet}" oninput="adet(${d.i},this.value)"><button onclick="artir(${d.i},1)">+</button></div><button class="btn del" onclick="sil(${d.i})">✕</button></div>`).join(''):'<p class="mut">Henüz bitki seçilmedi.</p>';
  $('ozet').innerHTML=kal_.map(k=>`<tr><td>${k[0]}${k[2]?`<span class="firma">${k[2]}</span>`:''}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+`<tr class="tot"><td>Toplam (KDV hariç)</td><td class="n">${tl(kal_.reduce((a,k)=>a+yuv(k[1]),0))}</td></tr>`+(sus.length?`<tr><td colspan="2" class="warn">Ayarlarda olağan dışı birim fiyat var: ${sus.join(', ')}. Ayarlar sekmesini kontrol et.</td></tr>`:'')+(tukendi.length?`<tr><td colspan="2" class="warn">Sitede tükenmiş: ${tukendi.map(d=>d.ad).join(', ')}</td></tr>`:'');
  const toplam=kal_.reduce((a,k)=>a+yuv(k[1]),0);$('altTop').textContent=tl(toplam);karCiz(kal_,toplam,malT,isG,stdT,K,gen);SON={kal:kal_.map(k=>[k[0],yuv(k[1]),Math.round(k[3]),k[2]||null]),toplam,mal:Math.round(malT),isG:Math.round(isG),K};$('cimBox').classList.toggle('hide',!$('cCim').checked);
  const grp={};ag.forEach(d=>{(grp[d.firma]=grp[d.firma]||[]).push(d)});
@@ -807,7 +819,7 @@ function hesap(seciliCiz=true){kaydet();
  const telG=dg.length===12?`+${dg.slice(0,2)} ${dg.slice(2,5)} ${dg.slice(5,8)} ${dg.slice(8,10)} ${dg.slice(10)}`:tel;
  const wa=(dg.length===12&&$('mWa').checked)?'wa.me/'+dg:'';
  const imza=[[ad,fir].filter(Boolean).join(' · '),wa?'📲 '+wa:'',telG?'☎️ '+telG:'',ig].filter(Boolean).join('\n');
- $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, yaklaşık ölçüsünü (m²) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
+ $('dm').value=`Merhaba, ilginiz için teşekkürler 🌿 Size net fiyat verebilmem için bahçenizin birkaç fotoğrafını, eni ve boyunu (ör. 5×8 m) ve semtinizi WhatsApp'tan gönderebilir misiniz?`+(wa?`\n📲 ${wa}`:'')+(telG?`\n☎️ ${telG}`:'');
  $('wa').value=selam+`\n\nKonsepte göre ${alan} m² alan için fiyat teklifimiz:\n\n`+kalemMetni(kal_,ag,m3,alan)+`\n\n*Toplam: ${tl(toplam)}* (KDV hariç, malzeme ve işçilik dahil)\n\n`+(ode?`Ödeme: ${ode}\n`:'')+($('mAbone').value.trim()?`${$('mAbone').value.trim()}\n`:'')+($('mBakim').value.trim()?`${$('mBakim').value.trim()}\n`:'')+(gun?`Bu teklif ${gun} gün geçerlidir.\n`:'')+`Kesin fiyat, ücretsiz keşifte ölçü alındıktan sonra netleşir. Size uygun bir gün söylerseniz keşfe gelelim.`+(imza?`\n\n${imza}`:'')}
 const AI_ATLA=['çiti','cit','çalısı','calisi','ağacı','agaci','adet','bitki','bitkisi','fidanı','fidan','grubu','yaklaşık','dekoratif','küçük','büyük','tane'];
 let aiSat=[];
@@ -841,7 +853,7 @@ async function teklifKaydet(){const tok=await oturumTok();if(!tok){toast('Önce 
   if(mid){const r=await sbc.from('tk_musteriler').update(mus).eq('id',mid);if(r.error)throw r.error}
   else{const r=await sbc.from('tk_musteriler').insert(mus).select('id').single();if(r.error)throw r.error;mid=r.data.id}
   const ag=secili.map(s=>({ad:DATA[s.i].ad,firma:DATA[s.i].firma,adet:s.adet,agac:s.agac,buyuk:!!s.buyuk,alis:DATA[s.i].fiyat}));
-  const dv={};['alan','kal','kOran','kIsci','kGun','kYev','kDig','zCit','zCal','zBod','zCic',...EKIS.map(e=>e[0]+'T')].forEach(k=>dv[k]=$(k).value);['cCim','cSul','kOn','mGrup',...EKIS.map(e=>e[0])].forEach(k=>dv[k]=$(k).checked);
+  const dv={elems:elKayit()};['bEn','bBoy','alan','kal','kOran','kIsci','kGun','kYev','kDig',...EKIS.map(e=>e[0]+'T')].forEach(k=>dv[k]=$(k).value);['cCim','cSul','kOn','mGrup',...EKIS.map(e=>e[0])].forEach(k=>dv[k]=$(k).checked);
   const t={musteri_id:mid,durum:$('kmDurum').value,alan:v('alan'),toprak_cm:v('kal'),cim:$('cCim').checked,sulama:$('cSul').checked,kar_orani:SON.K?v('kOran'):null,toplam:SON.toplam,maliyet:SON.mal,kar:SON.toplam-SON.mal,isci_gider:SON.isG,kalemler:SON.kal,bitkiler:ag,durum_verisi:dv,wa_metni:$('wa').value};
   const r=curId?await sbc.from('tk_teklifler').update(t).eq('id',curId).select('id').single():await sbc.from('tk_teklifler').insert(t).select('id').single();if(r.error)throw r.error;
   const yeniMi=!curId;curId=r.data.id;$('kmMsg').textContent=yeniMi?'✅ Kaydedildi':'✅ Güncellendi';toast(yeniMi?'Teklif kaydedildi':'Teklif güncellendi')}
@@ -866,7 +878,7 @@ function kayitCiz(){const q=norm($('kAra').value.trim()),L=KAYIT.filter(t=>{cons
 async function durumYaz(id,d){const r=await sbc.from('tk_teklifler').update({durum:d}).eq('id',id);if(r.error){toast('Hata: '+r.error.message);return}const t=KAYIT.find(x=>x.id===id);if(t)t.durum=d;kayitCiz();toast('Durum: '+DURUM[d])}
 async function gercekYaz(id,val){const g=val===''?null:+val;const r=await sbc.from('tk_teklifler').update({gercek_maliyet:g}).eq('id',id);if(r.error){toast('Hata: '+r.error.message);return}const t=KAYIT.find(x=>x.id===id);if(t)t.gercek_maliyet=g;kayitCiz();toast('Kaydedildi')}
 function teklifAc(id){const t=KAYIT.find(x=>x.id===id);if(!t)return;const dv=t.durum_verisi||{},m=t.tk_musteriler||{};
- Object.entries(dv).forEach(([k,val])=>{const e=$(k);if(!e)return;if(typeof val==='boolean')e.checked=val;else e.value=val});
+ elYukle(dv.elems);Object.entries(dv).forEach(([k,val])=>{if(k==='elems')return;const e=$(k);if(!e)return;if(typeof val==='boolean')e.checked=val;else e.value=val});
  secili=[];const kayip=[];(t.bitkiler||[]).forEach(b=>{const d=DATA.find(x=>x.ad===b.ad&&x.firma===b.firma)||DATA.find(x=>x.ad===b.ad);if(d)secili.push({i:d.i,adet:b.adet,agac:b.agac,buyuk:b.buyuk??buyukMu(d)});else kayip.push(b.ad)});
  $('musteri').value=m.ad||'';$('kmTel').value=m.telefon?'0'+m.telefon:'';$('kmIlce').value=m.ilce||'';if(m.kaynak)$('kmKaynak').value=m.kaynak;$('kmDurum').value=['taslak','gonderildi','kabul'].includes(t.durum)?t.durum:'kabul';
  EKIS.forEach(([i])=>$(i+'T').classList.toggle('hide',!$(i).checked));curId=t.id;$('kmMsg').textContent='Bu teklifi düzenliyorsun, Kaydet güncelleme yapar.';tab(1);hesap();toast(kayip.length?'Açıldı · katalogda bulunamayan: '+kayip.join(', '):'Teklif açıldı')}
@@ -879,22 +891,50 @@ function aiCiz(){if(!aiSat.length){$('aiOut').innerHTML=$('aiMetin').value.trim(
 function aiEkle(i,sessiz){const s=aiSat[i];if(!s||!s.aday.length)return;const d=s.aday[s.sec];const x=secili.find(z=>z.i===d.i);if(x)x.adet+=s.adet;else secili.push({i:d.i,adet:s.adet,agac:agacMi(d),buyuk:buyukMu(d)});if(!sessiz){hesap();toast(s.adet+' × '+d.ad.slice(0,28)+' eklendi')}}
 function aiHepsi(){let n=0;aiSat.forEach((s,i)=>{if(s.aday.length){aiEkle(i,true);n++}});hesap();toast(n+' kalem teklife eklendi')}
 const aBk=()=>Math.pow(v('fAB')||3,2),aKk=()=>Math.pow(v('fAK')||7.5,2);
-function planCiz(ag,alan,lim,agSay){const z={cit:v('zCit')*v('pCit'),cal:v('zCal')*v('pCal'),bod:v('zBod')*v('pBod'),cic:v('zCic')*v('pCic')};
- const top=Math.round(z.cit+z.cal+z.bod+z.cic),m2=v('zCal')+v('zBod')+v('zCic'),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
- if(!top){$('planOut').innerHTML='<span class="mut">Alan girince sonuç burada çıkar.</span>';return}
- const sat=(t,n,b)=>n?`<div>${t}: <b>${Math.round(n)} adet</b> <span class="mut">(${b})</span></div>`:'';
- let o=sat('🌲 Çit bitkisi',z.cit,v('zCit')+' m × '+v('pCit'))+sat('🌿 Çalı',z.cal,v('zCal')+' m² × '+v('pCal'))+sat('🍀 Bodur/yer örtücü',z.bod,v('zBod')+' m² × '+v('pBod'))+sat('🌸 Mevsimlik çiçek',z.cic,v('zCic')+' m² × '+v('pCic'));
- o+=`<div style="margin-top:6px">🌳 Ağaç: ${alan} m²'ye en fazla <b>${Math.floor(alan/aBk())}</b> bodur ya da <b>${Math.floor(alan/aKk())}</b> büyük taçlı sığar, teklifte ${agSay}</div>`;
- const fark=cS-top,oran=top?Math.abs(fark)/top:0;
- o+=`<div style="margin-top:8px;padding:8px 10px;border-radius:10px;background:${oran<=.15?'#e8f5ec':'#fff4e5'}">Toplam gereken: <b>${top}</b> çalı/süs bitkisi · Teklifte: <b>${cS}</b> → `+(oran<=.15?'✅ uygun':fark<0?`⚠️ <b>${-fark} eksik</b>, alan boş kalır`:`⚠️ <b>${fark} fazla</b>, sık olur ya da fiyat şişer`)+`</div>`;
- if(m2>alan)o+=`<div class="warn" style="margin-top:6px">Bitki alanları toplamı (${m2} m²) bahçeden (${alan} m²) büyük, ölçüleri kontrol et.</div>`;
- $('planOut').innerHTML=o}
+let elems=[],elSay=0;
+const ZEM={cak:['Çakıl','zgCak'],tas:['Doğal taş','zgTas'],dek:['Ahşap deck','zgDek'],kar:['Karo / kilit taşı','zgKar']};
+const ALANT={cal:['Çalı','pCal'],bod:['Yer örtücü / bodur','pBod'],cic:['Mevsimlik çiçek','pCic']};
+const n1=x=>Math.round(x*10)/10;
+function agacSigar(a,b,buyuk){const s=buyuk?(v('fAK')||7.5):(v('fAB')||3);const f=d=>d<s/2?0:(buyuk?Math.max(1,Math.floor(d/s)):Math.floor(d/s)+1);return f(a)*f(b)}
+function elHesap(e){const r={};
+ if(e.tip==='agac'){r.max=agacSigar(+e.en||0,+e.boy||0,e.tur==='buyuk');r.oto=r.max;r.not=!(+e.en&&+e.boy)?'Ölçüyü gir':r.max?`Bu alana en fazla ${r.max} ${e.tur==='buyuk'?'büyük taçlı':'bodur'} ağaç sığar (${e.tur==='buyuk'?v('fAK'):v('fAB')} m arayla)`:`Bu ölçüye ${e.tur==='buyuk'?'büyük taçlı ağaç sığmaz, en az '+n1((v('fAK')||7.5)/2)+' m genişlik gerekir':'ağaç sığmaz'}`}
+ else if(e.tip==='cit'){const ara=Math.min(1.5,Math.max(.3,.25+.25*(+e.bh||1)));r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${Math.round(ara*100)} cm ara = ${r.oto} bitki`:'Uzunluğu gir'}
+ else if(e.tip==='sar'){const ara=v('pSar')||1;r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${ara} m ara = ${r.oto} sarmaşık`:'Duvar uzunluğunu gir'}
+ else if(e.tip==='alan'){const t=ALANT[e.tur||'cal'];r.m2=(+e.en||0)*(+e.boy||0);r.oto=Math.ceil(r.m2*v(t[1]));r.not=r.m2?`${n1(r.m2)} m² × ${v(t[1])} adet = ${r.oto} bitki`:'Ölçüyü gir'}
+ else if(e.tip==='zemin'){const z=ZEM[e.tur||'cak'];r.m2=(+e.en||0)*(+e.boy||0);r.mal=r.m2*v(z[1]);r.not=r.m2?`${e.en} × ${e.boy} m = ${n1(r.m2)} m² ${z[0].toLocaleLowerCase('tr-TR')}`:'Ölçüyü gir'}
+ r.adet=e.tip==='zemin'?0:(e.adet!==''&&e.adet!=null?Math.max(0,parseInt(e.adet)||0):r.oto);return r}
+function elEkle(tip){const e={id:++elSay,tip,en:'',boy:'',uz:'',bh:'',tur:tip==='agac'?'bodur':tip==='alan'?'cal':tip==='zemin'?'cak':'',adet:'',bi:null,q:''};
+ if(tip==='agac'){e.en=$('bEn').value;e.boy=$('bBoy').value}
+ if(tip==='cit')e.bh='1';
+ elems.push(e);elCiz();hesap();setTimeout(()=>{const k=document.querySelector('#el'+e.id+' input');if(k)k.focus()},50)}
+function elSil(id){elems=elems.filter(e=>e.id!==id);elCiz();hesap()}
+function elSet(id,k,val,ciz){const e=elems.find(x=>x.id===id);if(!e)return;e[k]=val;if(ciz)elCiz();hesap()}
+function elBitkiAday(e){const q=norm(e.q||'').trim();if(!q)return[];return DATA.filter(d=>(e.tip!=='agac'||agacMi(d))&&q.split(/\s+/).every(w=>norm(d.ad).includes(w))).sort((a,b)=>b.stok-a.stok||a.fiyat-b.fiyat).slice(0,6)}
+function elAra(id,val){const e=elems.find(x=>x.id===id);if(!e)return;e.q=val;const L=elBitkiAday(e);$('ela'+id).innerHTML=L.map(d=>`<div onclick="elBitki(${id},${d.i})" style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);cursor:pointer">${foto(d)}<span style="flex:1;font-size:14px">${d.ad}${d.stok?'':' <span class="tag">tükendi</span>'}<br><span class="mut">${tl(d.fiyat)} · ${d.firma}</span></span></div>`).join('')}
+function elBitki(id,i){const e=elems.find(x=>x.id===id);if(!e)return;e.bi=i;e.q='';if(e.tip==='agac'&&e.tur!=='buyuk'&&buyukMu(DATA[i]))e.tur='buyuk';elCiz();hesap()}
+const EL_AD={agac:'🌳 Ağaç',cit:'🌲 Çit / duvar dibi',alan:'🌿 Çalı / çiçek alanı',sar:'🍃 Sarmaşık',zemin:'🪨 Sert zemin'};
+function elCiz(){const inp=(id,k,lab,ph)=>`<div><label>${lab}</label><input type="number" inputmode="decimal" value="${elems.find(x=>x.id===id)[k]}" placeholder="${ph||''}" oninput="elSet(${id},'${k}',this.value)"></div>`;
+ $('elemler').innerHTML=elems.map(e=>{const id=e.id,d=e.bi!=null?DATA[e.bi]:null;let f='';
+  if(e.tip==='agac')f=`<div class="grid">${inp(id,'en','En (m)')}${inp(id,'boy','Boy (m)')}</div><div style="display:flex;gap:8px;margin-top:8px">${['bodur','buyuk'].map(t=>`<button class="btn ${e.tur===t?'':'sec'}" style="flex:1" onclick="elSet(${id},'tur','${t}',1)">${t==='bodur'?'Bodur ('+v('fAB')+' m)':'Büyük taç ('+v('fAK')+' m)'}</button>`).join('')}</div>`;
+  else if(e.tip==='cit')f=`<div class="grid">${inp(id,'uz','Uzunluk (m)')}${inp(id,'bh','Bitki boyu (m)','1')}</div>`;
+  else if(e.tip==='sar')f=`<div class="grid">${inp(id,'uz','Duvar uzunluğu (m)')}</div>`;
+  else if(e.tip==='alan')f=`<div class="grid">${inp(id,'en','En (m)')}${inp(id,'boy','Boy (m)')}</div><select style="margin-top:8px" onchange="elSet(${id},'tur',this.value)">${Object.entries(ALANT).map(([k,a])=>`<option value="${k}"${e.tur===k?' selected':''}>${a[0]} (${v(a[1])} adet/m²)</option>`).join('')}</select>`;
+  else if(e.tip==='zemin')f=`<div class="grid">${inp(id,'en','Genişlik (m)','0.5')}${inp(id,'boy','Uzunluk (m)','3')}</div><select style="margin-top:8px" onchange="elSet(${id},'tur',this.value)">${Object.entries(ZEM).map(([k,a])=>`<option value="${k}"${e.tur===k?' selected':''}>${a[0]} (${tl(v(a[1]))}/m²)</option>`).join('')}</select>`;
+  const bit=e.tip==='zemin'?'':`<div style="display:flex;gap:8px;align-items:end;margin-top:8px"><div style="flex:1"><label>Adet</label><input type="number" inputmode="numeric" value="${e.adet}" placeholder="otomatik" oninput="elSet(${id},'adet',this.value)"></div></div>
+   ${d?`<div style="display:flex;gap:8px;align-items:center;margin-top:8px">${foto(d)}<span style="flex:1;font-size:14px">${d.ad}<br><span class="mut">${tl(d.fiyat)} · ${d.firma}</span></span><button class="btn sec" onclick="elSet(${id},'bi',null,1)">Değiştir</button></div>`:`<div style="margin-top:8px"><input type="search" placeholder="Bitki seç: ${e.tip==='cit'?'leylandi, ligustrum…':e.tip==='sar'?'yasemin, sarmaşık…':e.tip==='agac'?'zeytin, çınar…':'lavanta, biberiye…'}" oninput="elAra(${id},this.value)"><div id="ela${id}"></div></div>`}`;
+  return `<div id="el${id}" style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>${EL_AD[e.tip]}</b><button class="btn del" onclick="elSil(${id})">✕</button></div>${f}<div class="mut" id="eln${id}" style="margin-top:8px;font-size:13.5px"></div>${bit}</div>`}).join('')}
+function elBilgi(){elems.forEach(e=>{const r=elHesap(e),n=$('eln'+e.id);if(!n)return;let t='📏 '+r.not;if(e.tip!=='zemin'){if(e.adet!==''&&e.adet!=null&&+e.adet!==r.oto&&r.oto)t+=` · sen ${r.adet} yazdın`;if(e.bi==null&&r.adet)t+=' · ⚠️ bitki seçilmedi, fiyata girmedi'}else if(r.m2)t+=' · maliyet '+tl(Math.round(r.mal));n.textContent=t;n.style.color=/sığmaz|⚠️/.test(t)?'#c0392b':''})}
+function planAg(){return elems.filter(e=>e.tip!=='zemin'&&e.bi!=null).map(e=>({i:e.bi,adet:elHesap(e).adet,agac:e.tip==='agac',buyuk:e.tur==='buyuk'})).filter(x=>x.adet>0)}
+function elKayit(){return elems.map(e=>({...e,q:'',bAd:e.bi!=null?DATA[e.bi].ad:null,bFirma:e.bi!=null?DATA[e.bi].firma:null}))}
+function elYukle(L){elems=(L||[]).map(e=>{const d=e.bAd?(DATA.find(x=>x.ad===e.bAd&&x.firma===e.bFirma)||DATA.find(x=>x.ad===e.bAd)):null;return{...e,bi:d?d.i:null}});elSay=Math.max(0,...elems.map(e=>e.id));elCiz()}
+function planCiz(){elBilgi()}
 function karCiz(L,top,mal,isG,std,K,gen){const kar=top-mal,y=mal?kar/mal*100:0,c=kar>=0?'pos':'neg',f=x=>'%'+Math.round(x);
  $('kTeklif').textContent=tl(top);$('kMal').textContent=tl(Math.round(mal));$('kKar').textContent=tl(Math.round(kar));$('kKar').className=c;$('kYuz').textContent=mal?f(y):'–';$('kYuz').className=c;
  $('altKar').textContent=mal?'Kârın: '+tl(Math.round(kar))+' ('+f(y)+') ›':'';
  $('kNot').textContent=(top?`Satış üzerinden marj: ${f(kar/top*100)}.`:'')+(isG?'':' İşçi gideri girilmedi, kâra kendi emeğin de dahil.');
  let u='',kr=false;const sec=secili.length||v('alan')>0;
  if(sec&&!(v('kIsci')*v('kGun'))){u='👷 İşçilik girilmedi, fiyat eksik çıkar. <b>3. adıma git</b>';kr=true}
+ else if(elems.some(e=>e.tip!=='zemin'&&e.bi==null&&elHesap(e).adet>0)){u='🌱 Planda bitkisi seçilmemiş öğe var, fiyata girmedi. <b>2. adıma git</b>';kr=true}
  else if(sec&&EKIS.some(([i])=>$(i).checked&&!v(i+'T'))){u='✏️ Ek iş seçtin ama maliyetini yazmadın. <b>3. adıma git</b>';kr=true}
  else if(sec&&kar<0){u='⚠️ Bu teklif ZARAR ediyor ('+tl(Math.round(kar))+'). <b>4. adımda kârı artır</b>';kr=true}
  else if(sec){u='✅ Her şey tamam · cebine kalan '+tl(Math.round(kar))+' (%'+v('kOran')+')'}
@@ -902,12 +942,12 @@ function karCiz(L,top,mal,isG,std,K,gen){const kar=top-mal,y=mal?kar/mal*100:0,c
  $('kTab').innerHTML='<tr><th>Kalem</th><th class="n">Maliyet</th><th class="n">Teklif</th></tr>'+L.map(k=>`<tr><td>${k[0].replace(/ \(.*$/,'').slice(0,40)}${/^Toprak/.test(k[0])&&v('gFT')?' <span class="mut">(+%'+v('gFT')+' fire)</span>':/^Çim/.test(k[0])&&v('gFC')?' <span class="mut">(+%'+v('gFC')+' fire)</span>':''}</td><td class="n">${tl(Math.round(k[3]))}</td><td class="n">${tl(yuv(k[1]))}</td></tr>`).join('')+(isG?`<tr><td>İşçi + masraf + ek işler</td><td class="n">${tl(Math.round(isG))}</td><td class="n">–</td></tr>`:'')+(gen?`<tr><td>Genel gider (%${v('gGen')})</td><td class="n">${tl(Math.round(gen))}</td><td class="n">–</td></tr>`:'')+`<tr class="tot"><td>Toplam</td><td class="n">${tl(Math.round(mal))}</td><td class="n">${tl(top)}</td></tr>`}
 try{const o=localStorage.getItem('peyzajOran');if(o){$('kOran').value=o;$('kRng').value=Math.min(200,+o)}}catch(e){}
 function oranKaydet(){try{localStorage.setItem('peyzajOran',$('kOran').value)}catch(e){}}
-function uyariTik(){tab(1);const e=$('adim3');if(!(v('kIsci')*v('kGun'))){e.scrollIntoView({behavior:'smooth',block:'center'});$('kIsci').focus()}else e.nextElementSibling.scrollIntoView({behavior:'smooth',block:'center'})}
+function uyariTik(){tab(1);if(elems.some(x=>x.tip!=='zemin'&&x.bi==null&&elHesap(x).adet>0)){$('elemler').scrollIntoView({behavior:'smooth',block:'center'});return}const e=$('adim3');if(!(v('kIsci')*v('kGun'))){e.scrollIntoView({behavior:'smooth',block:'center'});$('kIsci').focus()}else e.nextElementSibling.scrollIntoView({behavior:'smooth',block:'center'})}
 function kSet(x){$('kOran').value=x;$('kRng').value=Math.min(200,x);$('kOn').checked=true;oranKaydet();hesap()}
 function kalemMetni(L,ag,m3,alan){const tek=k=>`• ${k[0].replace(/ × [\d.]+ TL( \+ [^)]*nakliye)?\)/,')')}: ${tl(yuv(k[1]))}`;
  if(!$('mGrup').checked){const ek=ekSecili().map(e=>e[1]);return L.map(tek).join('\n')+(ek.length?'\n• Ek işler: '+ek.join(', ')+' (fiyata dahil)':'')}
  const nS=L.length-ag.length,S=L.slice(0,nS),B=L.slice(nS),out=[];
- if(S.length){const p=[m3>0?'toprak dolgusu ('+(Math.round(m3*10)/10)+' m³)':''];if($('cCim').checked)p.push('çim');if($('cSul').checked)p.push('otomatik sulama');const q=p.filter(Boolean);
+ if(S.length){const p=[m3>0?'toprak dolgusu ('+(Math.round(m3*10)/10)+' m³)':''];if($('cCim').checked)p.push('çim');if(S.some(k=>/^Sert zemin/.test(k[0])))p.push('sert zemin');if($('cSul').checked)p.push('otomatik sulama');const q=p.filter(Boolean);
   const ad='Zemin hazırlığı, '+(q.length>1?q.slice(0,-1).join(', ')+' ve '+q.slice(-1):q[0]||'')+' ('+alan+' m²)';
   out.push(`• ${ad}: ${tl(S.reduce((a,k)=>a+yuv(k[1]),0))}`)}
  if(B.length){const aS=ag.filter(d=>d.agac).reduce((a,d)=>a+d.adet,0),cS=ag.filter(d=>!d.agac).reduce((a,d)=>a+d.adet,0);
@@ -927,7 +967,7 @@ let csvTA;function csv(){if(!csvTA){csvTA=document.createElement('textarea');csv
 CIM.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.ad+' – '+c.fiyat+' TL/m²';$('cimK').appendChild(o)});
 $('cimK').addEventListener('change',()=>hesap());
 ['cCim','cSul','kOn'].forEach(id=>$(id).addEventListener('change',()=>hesap()));
-['kIsci','kGun','kDig','zCit','zCal','zBod','zCic'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
+['kIsci','kGun','kDig','bEn','bBoy'].forEach(id=>$(id).addEventListener('input',()=>hesap()));
 $('aiMetin').addEventListener('input',aiCoz);
 $('kRng').addEventListener('input',()=>{$('kOran').value=$('kRng').value;oranKaydet();$('kOn').checked=true;hesap()});
 $('kOran').addEventListener('input',()=>{oranKaydet();$('kRng').value=Math.min(200,v('kOran'));hesap()});
