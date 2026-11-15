@@ -949,13 +949,13 @@ const n1=x=>Math.round(x*10)/10;
 function agacSigar(a,b,buyuk){const s=buyuk?(v('fAK')||7.5):(v('fAB')||3),k=buyuk?v('fAKk'):v('fABk');const f=d=>d<2*k||d<=0?0:Math.floor((d-2*k)/s)+1;return f(a)*f(b)}
 function elHesap(e){const r={};
  if(e.tip==='agac'){const ae=+e.en||v('bEn'),ab=+e.boy||v('bBoy');r.max=agacSigar(ae,ab,e.tur==='buyuk');r.oto=r.max?1:0;r.not=!(ae&&ab)?'Ölçüyü gir':r.max?`Adet: 1 (değiştirebilirsin) · bu alana en fazla ${r.max} ${e.tur==='buyuk'?'büyük taçlı':'bodur'} sığar (${e.tur==='buyuk'?v('fAK'):v('fAB')} m arayla, duvara ${e.tur==='buyuk'?v('fAKk'):v('fABk')} m)`:`Bu ölçüye ${e.tur==='buyuk'?'büyük taçlı ağaç önerilmez: duvara '+v('fAKk')+' m mesafe için en az '+n1(2*v('fAKk'))+' m genişlik gerekir':'ağaç sığmaz'}`}
- else if(e.tip==='cit'){const ara=Math.min(1.5,Math.max(.3,.25+.25*(+e.bh||1)));r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${Math.round(ara*100)} cm ara = ${r.oto} bitki`:'Uzunluğu gir'}
+ else if(e.tip==='cit'){let bcm=+e.bh||100;if(bcm<=5)bcm*=100;const ara=Math.min(1.5,Math.max(.3,.25+.25*bcm/100));r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${Math.round(ara*100)} cm ara = ${r.oto} bitki`:'Uzunluğu gir'}
  else if(e.tip==='sar'){const ara=v('pSar')||1;r.oto=+e.uz?Math.ceil(+e.uz/ara):0;r.not=+e.uz?`${e.uz} m ÷ ${ara} m ara = ${r.oto} sarmaşık`:'Duvar uzunluğunu gir'}
  else if(e.tip==='alan'){const t=ALANT[e.tur||'cal'];r.m2=(+e.en||0)*(+e.boy||0);r.oto=Math.ceil(r.m2*v(t[1]));r.not=r.m2?`${n1(r.m2)} m² × ${v(t[1])} adet = ${r.oto} bitki`:'Ölçüyü gir'}
  else if(e.tip==='zemin'){const z=ZEM[e.tur||'cak'];r.m2=(+e.en||0)*(+e.boy||0);r.mal=r.m2*v(z[1]);r.not=r.m2?`${e.en} × ${e.boy} m = ${n1(r.m2)} m² ${z[0].toLocaleLowerCase('tr-TR')}`:'Ölçüyü gir'}
  r.adet=e.tip==='zemin'?0:(e.adet!==''&&e.adet!=null?Math.max(0,parseInt(e.adet)||0):r.oto);return r}
 function elEkle(tip){const e={id:++elSay,tip,en:'',boy:'',uz:'',bh:'',tur:tip==='agac'?'bodur':tip==='alan'?'cal':tip==='zemin'?'cak':'',adet:'',bi:null,q:''};
- if(tip==='cit')e.bh='1';
+ if(tip==='cit')e.bh='100';
  elems.push(e);elAc(e.id);hesap()}
 function elSil(id){elems=elems.filter(e=>e.id!==id);if(elAcik===id){elAcik=null;$('elModal').classList.add('hide')}elCiz();hesap()}
 function elSet(id,k,val,ciz){const e=elems.find(x=>x.id===id);if(!e)return;e[k]=val;if(ciz)elCiz();else $('elemler').innerHTML=elems.map(elSatir).join('');hesap()}
@@ -966,7 +966,7 @@ const EL_AD={agac:'🌳 Ağaç',cit:'🌲 Çit / duvar dibi',alan:'🌿 Çalı /
 let elAcik=null;
 function elEditor(e){const inp=(id,k,lab,ph)=>`<div><label>${lab}</label><input type="number" inputmode="decimal" value="${elems.find(x=>x.id===id)[k]}" placeholder="${ph||''}" oninput="elSet(${id},'${k}',this.value)"></div>`;const id=e.id,d=e.bi!=null?DATA[e.bi]:null;let f='';
   if(e.tip==='agac')f=((v('bEn')&&v('bBoy')&&!e.ozel)?`<div class="mut" style="font-size:13.5px">Alan: bahçenin tamamı (${v('bEn')} × ${v('bBoy')} m) · <a href="#" onclick="elSet(${id},'ozel',1,1);return false" style="color:var(--acc)">farklı bir köşe mi?</a></div>`:`<div class="grid">${inp(id,'en','En (m)',v('bEn')||'')}${inp(id,'boy','Boy (m)',v('bBoy')||'')}</div>`)+`<div style="display:flex;gap:8px;margin-top:8px">${['bodur','buyuk'].map(t=>`<button class="btn ${e.tur===t?'':'sec'}" style="flex:1" onclick="elSet(${id},'tur','${t}',1)">${t==='bodur'?'Bodur ('+v('fAB')+' m)':'Büyük taç ('+v('fAK')+' m)'}</button>`).join('')}</div>`;
-  else if(e.tip==='cit')f=`<div class="grid">${inp(id,'uz','Uzunluk (m)')}${inp(id,'bh','Bitki boyu (m)','1')}</div>`;
+  else if(e.tip==='cit')f=`<div class="grid">${inp(id,'uz','Uzunluk (m)')}${inp(id,'bh','Bitki boyu (cm)','100')}</div>`;
   else if(e.tip==='sar')f=`<div class="grid">${inp(id,'uz','Duvar uzunluğu (m)')}</div>`;
   else if(e.tip==='alan')f=`<div class="grid">${inp(id,'en','En (m)')}${inp(id,'boy','Boy (m)')}</div><select style="margin-top:8px" onchange="elSet(${id},'tur',this.value)">${Object.entries(ALANT).map(([k,a])=>`<option value="${k}"${e.tur===k?' selected':''}>${a[0]} (${v(a[1])} adet/m²)</option>`).join('')}</select>`;
   else if(e.tip==='zemin')f=`<div class="grid">${inp(id,'en','Genişlik (m)','0.5')}${inp(id,'boy','Uzunluk (m)','3')}</div><select style="margin-top:8px" onchange="elSet(${id},'tur',this.value)">${Object.entries(ZEM).map(([k,a])=>`<option value="${k}"${e.tur===k?' selected':''}>${a[0]} (${tl(v(a[1]))}/m²)</option>`).join('')}</select>`;
